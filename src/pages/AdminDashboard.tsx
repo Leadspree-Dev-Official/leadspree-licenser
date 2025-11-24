@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LogOut, Users, Package, Key, Settings } from "lucide-react";
+import { LogOut, Users, Package, Key, Settings, FileKey } from "lucide-react";
 import UsersManagement from "@/components/admin/UsersManagement";
 import SoftwareManagement from "@/components/admin/SoftwareManagement";
 import AllocationsManagement from "@/components/admin/AllocationsManagement";
 import ApiKeysManagement from "@/components/admin/ApiKeysManagement";
+import AdminLicenseGeneration from "@/components/admin/AdminLicenseGeneration";
 
 const AdminDashboard = () => {
   const { profile, loading, signOut } = useAuth();
@@ -56,7 +57,7 @@ const AdminDashboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto">
             <TabsTrigger value="users" className="gap-2">
               <Users className="w-4 h-4" />
               Users
@@ -68,6 +69,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="allocations" className="gap-2">
               <Settings className="w-4 h-4" />
               Allocations
+            </TabsTrigger>
+            <TabsTrigger value="licenses" className="gap-2">
+              <FileKey className="w-4 h-4" />
+              Licenses
             </TabsTrigger>
             <TabsTrigger value="api-keys" className="gap-2">
               <Key className="w-4 h-4" />
@@ -85,6 +90,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="allocations">
             <AllocationsManagement />
+          </TabsContent>
+
+          <TabsContent value="licenses">
+            <AdminLicenseGeneration />
           </TabsContent>
 
           <TabsContent value="api-keys">
