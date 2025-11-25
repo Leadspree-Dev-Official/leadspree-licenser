@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Key } from "lucide-react";
+import { Key, Copy, Edit, Save, Trash2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 interface Allocation {
   id: string;
@@ -17,10 +19,29 @@ interface Allocation {
   software: { name: string };
 }
 
+interface License {
+  id: string;
+  license_key: string;
+  buyer_name: string;
+  buyer_email: string | null;
+  buyer_phone: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  amount: number | null;
+  pay_mode: string | null;
+  issue_date: string | null;
+  is_active: boolean;
+  created_at: string;
+  software: { name: string };
+}
+
 const LicenseGeneration = () => {
   const { user } = useAuth();
   const [allocations, setAllocations] = useState<Allocation[]>([]);
+  const [recentLicenses, setRecentLicenses] = useState<License[]>([]);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editedData, setEditedData] = useState<Partial<License>>({});
   const [formData, setFormData] = useState({
     software_id: "",
     buyer_name: "",
@@ -36,6 +57,7 @@ const LicenseGeneration = () => {
   useEffect(() => {
     if (user) {
       fetchAllocations();
+      fetchRecentLicenses();
     }
   }, [user]);
 
@@ -50,6 +72,38 @@ const LicenseGeneration = () => {
       setAllocations(data || []);
     } catch (error: any) {
       toast.error("Failed to load allocations");
+    }
+  };
+
+  const fetchRecentLicenses = async () => {
+    try {
+      if (!user) return;
+      
+      const { data, error } = await supabase
+        .from("licenses")
+        .select(`
+          id, 
+          license_key, 
+          buyer_name, 
+          buyer_email, 
+          buyer_phone,
+          start_date,
+          end_date,
+          amount,
+          pay_mode,
+          issue_date,
+          is_active,
+          created_at, 
+          software(name)
+        `)
+        .eq("created_by", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+      setRecentLicenses(data || []);
+    } catch (error: any) {
+      console.error("Failed to load recent licenses:", error);
     }
   };
 
@@ -138,6 +192,7 @@ const LicenseGeneration = () => {
       });
 
       fetchAllocations();
+      fetchRecentLicenses();
     } catch (error: any) {
       toast.error(error.message || "Failed to generate license");
     } finally {
@@ -145,7 +200,71 @@ const LicenseGeneration = () => {
     }
   };
 
+  const handleCopyLicense = (licenseKey: string) => {
+    navigator.clipboard.writeText(licenseKey);
+    toast.success("License key copied to clipboard");
+  };
+
+  const handleEdit = (license: License) => {
+    setEditingId(license.id);
+    setEditedData(license);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditedData({});
+  };
+
+  const handleSave = async (licenseId: string) => {
+    try {
+      const { error } = await supabase
+        .from("licenses")
+        .update({
+          buyer_name: editedData.buyer_name,
+          buyer_email: editedData.buyer_email,
+          buyer_phone: editedData.buyer_phone,
+          start_date: editedData.start_date,
+          end_date: editedData.end_date,
+          amount: editedData.amount,
+          pay_mode: editedData.pay_mode,
+          issue_date: editedData.issue_date,
+          is_active: editedData.end_date 
+            ? new Date(editedData.end_date) >= new Date(new Date().setHours(0, 0, 0, 0))
+            : true,
+        })
+        .eq("id", licenseId);
+
+      if (error) throw error;
+
+      toast.success("License updated successfully");
+      setEditingId(null);
+      setEditedData({});
+      fetchRecentLicenses();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update license");
+    }
+  };
+
+  const handleDelete = async (licenseId: string) => {
+    if (!confirm("Are you sure you want to delete this license?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("licenses")
+        .delete()
+        .eq("id", licenseId);
+
+      if (error) throw error;
+
+      toast.success("License deleted successfully");
+      fetchRecentLicenses();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete license");
+    }
+  };
+
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
@@ -283,6 +402,239 @@ const LicenseGeneration = () => {
         </form>
       </CardContent>
     </Card>
+
+    <Card className="mt-6">
+      <CardHeader>
+        <CardTitle>Recent Licenses</CardTitle>
+        <CardDescription>Your latest generated licenses</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {recentLicenses.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">No licenses generated yet</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>License Key</TableHead>
+                  <TableHead>Software</TableHead>
+                  <TableHead>Buyer</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Start Date</TableHead>
+                  <TableHead>End Date</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Pay Mode</TableHead>
+                  <TableHead>Issue Date</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentLicenses.map((license) => {
+                  const isEditing = editingId === license.id;
+                  return (
+                    <TableRow key={license.id}>
+                      <TableCell className="font-mono text-sm">
+                        <div className="flex items-center gap-2">
+                          {license.license_key}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyLicense(license.license_key)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{license.software.name}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <Input
+                            value={editedData.buyer_name || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, buyer_name: e.target.value })
+                            }
+                            className="w-full"
+                          />
+                        ) : (
+                          license.buyer_name
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Input
+                            type="email"
+                            value={editedData.buyer_email || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, buyer_email: e.target.value })
+                            }
+                            className="w-full"
+                          />
+                        ) : (
+                          license.buyer_email || "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Input
+                            type="tel"
+                            value={editedData.buyer_phone || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, buyer_phone: e.target.value })
+                            }
+                            className="w-full"
+                          />
+                        ) : (
+                          license.buyer_phone || "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Input
+                            type="date"
+                            value={editedData.start_date || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, start_date: e.target.value })
+                            }
+                            className="w-full"
+                          />
+                        ) : license.start_date ? (
+                          new Date(license.start_date).toLocaleDateString()
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Input
+                            type="date"
+                            value={editedData.end_date || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, end_date: e.target.value })
+                            }
+                            className="w-full"
+                          />
+                        ) : license.end_date ? (
+                          new Date(license.end_date).toLocaleDateString()
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={license.is_active ? "default" : "secondary"}>
+                          {license.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            step="0.01"
+                            value={editedData.amount || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, amount: parseFloat(e.target.value) })
+                            }
+                            className="w-full"
+                          />
+                        ) : license.amount ? (
+                          `₹${license.amount.toFixed(2)}`
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Select
+                            value={editedData.pay_mode || ""}
+                            onValueChange={(value) =>
+                              setEditedData({ ...editedData, pay_mode: value })
+                            }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="UPI">UPI</SelectItem>
+                              <SelectItem value="Bank">Bank</SelectItem>
+                              <SelectItem value="Cash">Cash</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          license.pay_mode || "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {isEditing ? (
+                          <Input
+                            type="date"
+                            value={editedData.issue_date || ""}
+                            onChange={(e) =>
+                              setEditedData({ ...editedData, issue_date: e.target.value })
+                            }
+                            className="w-full"
+                          />
+                        ) : license.issue_date ? (
+                          new Date(license.issue_date).toLocaleDateString()
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(license.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {isEditing ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSave(license.id)}
+                              >
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleCancelEdit}
+                              >
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(license)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(license.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  </>
   );
 };
 
