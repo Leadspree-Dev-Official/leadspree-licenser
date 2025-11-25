@@ -26,8 +26,11 @@ const LicenseGeneration = () => {
     buyer_name: "",
     buyer_email: "",
     buyer_phone: "",
-    buyer_city: "",
-    buyer_country: "",
+    start_date: "",
+    end_date: "",
+    amount: "",
+    pay_mode: "",
+    issue_date: new Date().toISOString().split('T')[0],
   });
 
   useEffect(() => {
@@ -66,23 +69,6 @@ const LicenseGeneration = () => {
     setLoading(true);
 
     try {
-      // Check buyer email limit (max 5 licenses per email per software)
-      const { count, error: countError } = await supabase
-        .from("licenses")
-        .select("*", { count: "exact", head: true })
-        .eq("buyer_email", formData.buyer_email)
-        .eq("software_id", formData.software_id);
-
-      if (countError) throw countError;
-
-      if (count && count >= 5) {
-        toast.error(
-          "This buyer email has already been used 5 times for this software. License generation blocked."
-        );
-        setLoading(false);
-        return;
-      }
-
       // Check if reseller has remaining quota
       const allocation = allocations.find((a) => a.software_id === formData.software_id);
       if (!allocation) {
@@ -97,6 +83,15 @@ const LicenseGeneration = () => {
         return;
       }
 
+      // Calculate is_active based on end_date
+      let isActive = true;
+      if (formData.end_date) {
+        const endDate = new Date(formData.end_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        isActive = endDate >= today;
+      }
+
       // Generate license
       const licenseKey = generateLicenseKey();
       const { error: insertError } = await supabase.from("licenses").insert([
@@ -104,10 +99,15 @@ const LicenseGeneration = () => {
           license_key: licenseKey,
           software_id: formData.software_id,
           buyer_name: formData.buyer_name,
-          buyer_email: formData.buyer_email,
-          buyer_phone: formData.buyer_phone,
-          buyer_city: formData.buyer_city || null,
-          buyer_country: formData.buyer_country || null,
+          buyer_email: formData.buyer_email || null,
+          buyer_phone: formData.buyer_phone || null,
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          amount: formData.amount ? parseFloat(formData.amount) : null,
+          pay_mode: formData.pay_mode || null,
+          reseller_id: user!.id,
+          issue_date: formData.issue_date || null,
+          is_active: isActive,
           created_by: user!.id,
         },
       ]);
@@ -130,8 +130,11 @@ const LicenseGeneration = () => {
         buyer_name: "",
         buyer_email: "",
         buyer_phone: "",
-        buyer_city: "",
-        buyer_country: "",
+        start_date: "",
+        end_date: "",
+        amount: "",
+        pay_mode: "",
+        issue_date: new Date().toISOString().split('T')[0],
       });
 
       fetchAllocations();
@@ -180,7 +183,7 @@ const LicenseGeneration = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="buyer_name">Buyer Name *</Label>
+              <Label htmlFor="buyer_name">Name *</Label>
               <Input
                 id="buyer_name"
                 value={formData.buyer_name}
@@ -190,46 +193,88 @@ const LicenseGeneration = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="buyer_email">Buyer Email *</Label>
+              <Label htmlFor="buyer_email">Email</Label>
               <Input
                 id="buyer_email"
                 type="email"
                 value={formData.buyer_email}
                 onChange={(e) => setFormData({ ...formData, buyer_email: e.target.value })}
-                required
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="buyer_phone">Buyer Phone *</Label>
+              <Label htmlFor="buyer_phone">Phone</Label>
               <Input
                 id="buyer_phone"
                 type="tel"
                 value={formData.buyer_phone}
                 onChange={(e) => setFormData({ ...formData, buyer_phone: e.target.value })}
-                required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="buyer_city">Buyer City</Label>
+              <Label htmlFor="start_date">Start Date</Label>
               <Input
-                id="buyer_city"
-                value={formData.buyer_city}
-                onChange={(e) => setFormData({ ...formData, buyer_city: e.target.value })}
+                id="start_date"
+                type="date"
+                value={formData.start_date}
+                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="buyer_country">Buyer Country</Label>
-            <Input
-              id="buyer_country"
-              value={formData.buyer_country}
-              onChange={(e) => setFormData({ ...formData, buyer_country: e.target.value })}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="end_date">End Date</Label>
+              <Input
+                id="end_date"
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="issue_date">Issue Date</Label>
+              <Input
+                id="issue_date"
+                type="date"
+                value={formData.issue_date}
+                onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount">Amount</Label>
+              <Input
+                id="amount"
+                type="number"
+                step="0.01"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="pay_mode">Pay Mode</Label>
+              <Select
+                value={formData.pay_mode}
+                onValueChange={(value) => setFormData({ ...formData, pay_mode: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment mode" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="UPI">UPI</SelectItem>
+                  <SelectItem value="Bank">Bank</SelectItem>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
