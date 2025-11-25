@@ -22,9 +22,18 @@ interface License {
   id: string;
   license_key: string;
   buyer_name: string;
-  buyer_email: string;
+  buyer_email: string | null;
+  buyer_phone: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  amount: number | null;
+  pay_mode: string | null;
+  issue_date: string | null;
+  is_active: boolean;
   created_at: string;
   software: { name: string };
+  reseller_id: string | null;
+  profiles: { full_name: string | null; email: string } | null;
 }
 
 interface Profile {
@@ -95,7 +104,23 @@ const AdminLicenseGeneration = () => {
       
       const { data, error } = await supabase
         .from("licenses")
-        .select("id, license_key, buyer_name, buyer_email, created_at, software(name)")
+        .select(`
+          id, 
+          license_key, 
+          buyer_name, 
+          buyer_email, 
+          buyer_phone,
+          start_date,
+          end_date,
+          amount,
+          pay_mode,
+          issue_date,
+          is_active,
+          created_at, 
+          software(name),
+          reseller_id,
+          profiles!reseller_id(full_name, email)
+        `)
         .eq("created_by", user.id)
         .order("created_at", { ascending: false })
         .limit(10);
@@ -342,32 +367,64 @@ const AdminLicenseGeneration = () => {
           {recentLicenses.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">No licenses generated yet</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>License Key</TableHead>
-                  <TableHead>Software</TableHead>
-                  <TableHead>Buyer</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentLicenses.map((license) => (
-                  <TableRow key={license.id}>
-                    <TableCell className="font-mono text-sm">{license.license_key}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{license.software.name}</Badge>
-                    </TableCell>
-                    <TableCell>{license.buyer_name}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{license.buyer_email}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {new Date(license.created_at).toLocaleDateString()}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>License Key</TableHead>
+                    <TableHead>Software</TableHead>
+                    <TableHead>Buyer</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Start Date</TableHead>
+                    <TableHead>End Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Pay Mode</TableHead>
+                    <TableHead>Reseller</TableHead>
+                    <TableHead>Issue Date</TableHead>
+                    <TableHead>Created</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {recentLicenses.map((license) => (
+                    <TableRow key={license.id}>
+                      <TableCell className="font-mono text-sm">{license.license_key}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{license.software.name}</Badge>
+                      </TableCell>
+                      <TableCell>{license.buyer_name}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{license.buyer_email || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{license.buyer_phone || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {license.start_date ? new Date(license.start_date).toLocaleDateString() : "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {license.end_date ? new Date(license.end_date).toLocaleDateString() : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={license.is_active ? "default" : "secondary"}>
+                          {license.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {license.amount ? `₹${license.amount.toFixed(2)}` : "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{license.pay_mode || "-"}</TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {license.profiles ? (license.profiles.full_name || license.profiles.email) : "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {license.issue_date ? new Date(license.issue_date).toLocaleDateString() : "-"}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(license.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
