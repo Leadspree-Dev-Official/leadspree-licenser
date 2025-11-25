@@ -54,48 +54,73 @@ export type Database = {
       }
       licenses: {
         Row: {
+          amount: number | null
           buyer_city: string | null
           buyer_country: string | null
-          buyer_email: string
+          buyer_email: string | null
           buyer_name: string
-          buyer_phone: string
+          buyer_phone: string | null
           created_at: string
           created_by: string | null
+          end_date: string | null
           id: string
           is_active: boolean
+          issue_date: string | null
           license_key: string
+          pay_mode: string | null
+          reseller_id: string | null
           software_id: string
+          start_date: string | null
         }
         Insert: {
+          amount?: number | null
           buyer_city?: string | null
           buyer_country?: string | null
-          buyer_email: string
+          buyer_email?: string | null
           buyer_name: string
-          buyer_phone: string
+          buyer_phone?: string | null
           created_at?: string
           created_by?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
+          issue_date?: string | null
           license_key: string
+          pay_mode?: string | null
+          reseller_id?: string | null
           software_id: string
+          start_date?: string | null
         }
         Update: {
+          amount?: number | null
           buyer_city?: string | null
           buyer_country?: string | null
-          buyer_email?: string
+          buyer_email?: string | null
           buyer_name?: string
-          buyer_phone?: string
+          buyer_phone?: string | null
           created_at?: string
           created_by?: string | null
+          end_date?: string | null
           id?: string
           is_active?: boolean
+          issue_date?: string | null
           license_key?: string
+          pay_mode?: string | null
+          reseller_id?: string | null
           software_id?: string
+          start_date?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "licenses_created_by_fkey"
             columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "licenses_reseller_id_fkey"
+            columns: ["reseller_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
