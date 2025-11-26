@@ -18,6 +18,9 @@ import AdminApiKeysPage from "./pages/admin/AdminApiKeysPage";
 import ResellerLayout from "./pages/reseller/ResellerLayout";
 import ResellerDashboardOverview from "./pages/reseller/ResellerDashboardOverview";
 import ResellerLicensesPage from "./pages/reseller/ResellerLicensesPage";
+import ResellerOverviewPage from "./pages/reseller/ResellerOverviewPage";
+import ResellerAllocationsPage from "./pages/reseller/ResellerAllocationsPage";
+import ResellerIssuedLicensesPage from "./pages/reseller/ResellerIssuedLicensesPage";
 
 const queryClient = new QueryClient();
 
@@ -46,7 +49,10 @@ const App = () => (
             {/* Reseller Routes */}
             <Route path="/dashboard" element={<ResellerLayout />}>
               <Route index element={<ResellerDashboardOverview />} />
+              <Route path="overview" element={<ResellerOverviewPage />} />
+              <Route path="allocations" element={<ResellerAllocationsPage />} />
               <Route path="licenses" element={<ResellerLicensesPage />} />
+              <Route path="issued" element={<ResellerIssuedLicensesPage />} />
             </Route>
 
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

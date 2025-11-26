@@ -87,9 +87,9 @@ const ResellerDashboardOverview = () => {
   const totalUsed = allocations.reduce((sum, a) => sum + a.licenses_used, 0);
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-4 lg:p-8 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Reseller Dashboard</h1>
+        <h1 className="text-2xl lg:text-3xl font-bold">Reseller Dashboard</h1>
         <p className="text-muted-foreground">Welcome back! Here's your license overview.</p>
       </div>
 

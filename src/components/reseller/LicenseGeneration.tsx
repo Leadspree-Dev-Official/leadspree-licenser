@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Key, Copy, Edit, Save, Trash2 } from "lucide-react";
+import { Key, Copy, Edit, Save, Trash2, X } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
@@ -416,19 +416,19 @@ const LicenseGeneration = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>License Key</TableHead>
+                  <TableHead className="w-[120px]">Actions</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="whitespace-nowrap">License Key</TableHead>
                   <TableHead>Software</TableHead>
                   <TableHead>Buyer</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Start Date</TableHead>
-                  <TableHead>End Date</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead className="whitespace-nowrap">Start Date</TableHead>
+                  <TableHead className="whitespace-nowrap">End Date</TableHead>
                   <TableHead>Amount</TableHead>
-                  <TableHead>Pay Mode</TableHead>
-                  <TableHead>Issue Date</TableHead>
+                  <TableHead className="whitespace-nowrap">Pay Mode</TableHead>
+                  <TableHead className="whitespace-nowrap">Issue Date</TableHead>
                   <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -436,15 +436,76 @@ const LicenseGeneration = () => {
                   const isEditing = editingId === license.id;
                   return (
                     <TableRow key={license.id}>
-                      <TableCell className="font-mono text-sm">
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {isEditing ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSave(license.id)}
+                              >
+                                <Save className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleCancelEdit}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(license)}
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(license.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                          <Select
+                            value={editedData.is_active ? "active" : "inactive"}
+                            onValueChange={(value) =>
+                              setEditedData({ ...editedData, is_active: value === "active" })
+                            }
+                          >
+                            <SelectTrigger className="w-[110px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="active">Active</SelectItem>
+                              <SelectItem value="inactive">Inactive</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Badge variant={license.is_active ? "default" : "secondary"}>
+                            {license.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         <div className="flex items-center gap-2">
-                          {license.license_key}
+                          <span className="font-mono text-sm whitespace-nowrap">{license.license_key}</span>
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => handleCopyLicense(license.license_key)}
                           >
-                            <Copy className="w-4 h-4" />
+                            <Copy className="w-3 h-3" />
                           </Button>
                         </div>
                       </TableCell>
@@ -492,7 +553,7 @@ const LicenseGeneration = () => {
                           license.buyer_phone || "-"
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                         {isEditing ? (
                           <Input
                             type="date"
@@ -508,7 +569,7 @@ const LicenseGeneration = () => {
                           "-"
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                         {isEditing ? (
                           <Input
                             type="date"
@@ -523,11 +584,6 @@ const LicenseGeneration = () => {
                         ) : (
                           "-"
                         )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={license.is_active ? "default" : "secondary"}>
-                          {license.is_active ? "Active" : "Inactive"}
-                        </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
                         {isEditing ? (
@@ -546,7 +602,7 @@ const LicenseGeneration = () => {
                           "-"
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                         {isEditing ? (
                           <Select
                             value={editedData.pay_mode || ""}
@@ -567,7 +623,7 @@ const LicenseGeneration = () => {
                           license.pay_mode || "-"
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                         {isEditing ? (
                           <Input
                             type="date"
@@ -583,47 +639,8 @@ const LicenseGeneration = () => {
                           "-"
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                         {new Date(license.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {isEditing ? (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleSave(license.id)}
-                              >
-                                <Save className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleCancelEdit}
-                              >
-                                Cancel
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(license)}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(license.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
                       </TableCell>
                     </TableRow>
                   );

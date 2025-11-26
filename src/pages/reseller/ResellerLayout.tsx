@@ -33,7 +33,7 @@ const ResellerLayout = () => {
   return (
     <div className="min-h-screen flex w-full bg-background">
       <DashboardSidebar role="reseller" />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto lg:ml-0">
         <Outlet />
       </main>
     </div>
