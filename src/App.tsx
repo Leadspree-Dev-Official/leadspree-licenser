@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboardOverview from "./pages/admin/AdminDashboardOverview";
 import AdminLicensesPage from "./pages/admin/AdminLicensesPage";
+import AdminIssuedLicensesPage from "./pages/admin/AdminIssuedLicensesPage";
 import AdminSoftwarePage from "./pages/admin/AdminSoftwarePage";
 import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardOverview />} />
               <Route path="licenses" element={<AdminLicensesPage />} />
+              <Route path="issued" element={<AdminIssuedLicensesPage />} />
               <Route path="software" element={<AdminSoftwarePage />} />
               <Route path="allocations" element={<AdminAllocationsPage />} />
               <Route path="users" element={<AdminUsersPage />} />

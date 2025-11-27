@@ -55,6 +55,14 @@ const ResellerIssuedLicensesPage = () => {
     }
   };
 
+  const calculateStatus = (endDate: string | null) => {
+    if (!endDate) return true;
+    const end = new Date(endDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return end >= today;
+  };
+
   const handleCopyLicense = (licenseKey: string) => {
     navigator.clipboard.writeText(licenseKey);
     toast.success("License key copied to clipboard!");
@@ -72,9 +80,16 @@ const ResellerIssuedLicensesPage = () => {
 
   const handleSave = async (id: string) => {
     try {
+      const updatedIsActive = editedData.end_date 
+        ? calculateStatus(editedData.end_date)
+        : true;
+
       const { error } = await supabase
         .from("licenses")
-        .update(editedData)
+        .update({
+          ...editedData,
+          is_active: updatedIsActive,
+        })
         .eq("id", id);
 
       if (error) throw error;
@@ -134,12 +149,13 @@ const ResellerIssuedLicensesPage = () => {
           {licenses.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">No licenses generated yet</p>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <div className="max-h-[600px] overflow-y-auto">
+              <div className="overflow-x-auto">
+                <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="w-[100px] sticky left-0 bg-background z-10">Actions</TableHead>
+                    <TableHead className="sticky left-[100px] bg-background z-10">Status</TableHead>
                     <TableHead className="whitespace-nowrap">License Key</TableHead>
                     <TableHead>Software</TableHead>
                     <TableHead>Name</TableHead>
@@ -154,10 +170,12 @@ const ResellerIssuedLicensesPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {licenses.map((license) => (
-                    <TableRow key={license.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
+                  {licenses.map((license) => {
+                    const computedStatus = calculateStatus(license.end_date);
+                    return (
+                      <TableRow key={license.id}>
+                        <TableCell className="sticky left-0 bg-background">
+                          <div className="flex items-center gap-1">
                           {editingId === license.id ? (
                             <>
                               <Button
@@ -195,7 +213,7 @@ const ResellerIssuedLicensesPage = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="sticky left-[100px] bg-background">
                         {editingId === license.id ? (
                           <Select
                             value={editedData.is_active ? "active" : "inactive"}
@@ -212,14 +230,14 @@ const ResellerIssuedLicensesPage = () => {
                             </SelectContent>
                           </Select>
                         ) : (
-                          <Badge variant={license.is_active ? "default" : "secondary"}>
-                            {license.is_active ? "Active" : "Inactive"}
+                          <Badge variant={computedStatus ? "default" : "secondary"}>
+                            {computedStatus ? "Active" : "Inactive"}
                           </Badge>
                         )}
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm whitespace-nowrap">{license.license_key}</span>
+                        <div className="flex items-center gap-2 whitespace-nowrap">
+                          <span className="font-mono text-sm">{license.license_key}</span>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -345,10 +363,12 @@ const ResellerIssuedLicensesPage = () => {
                         {new Date(license.created_at).toLocaleDateString()}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  );
+                  })}
                 </TableBody>
               </Table>
             </div>
+          </div>
           )}
         </CardContent>
       </Card>
