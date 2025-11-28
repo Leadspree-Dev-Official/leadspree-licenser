@@ -114,6 +114,7 @@ const AdminLicenseGeneration = () => {
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           amount: formData.amount ? parseFloat(formData.amount) : null,
+          currency: formData.currency,
           pay_mode: formData.pay_mode || null,
           reseller_id: formData.reseller_id || null,
           issue_date: formData.issue_date || null,

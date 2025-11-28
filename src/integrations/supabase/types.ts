@@ -62,6 +62,7 @@ export type Database = {
           buyer_phone: string | null
           created_at: string
           created_by: string | null
+          currency: string | null
           end_date: string | null
           id: string
           is_active: boolean
@@ -81,6 +82,7 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
@@ -100,6 +102,7 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
