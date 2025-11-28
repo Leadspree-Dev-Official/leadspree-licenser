@@ -36,6 +36,7 @@ const AdminLicenseGeneration = () => {
     start_date: "",
     end_date: "",
     amount: "",
+    currency: "USD",
     pay_mode: "",
     reseller_id: "",
     issue_date: new Date().toISOString().split('T')[0],
@@ -134,6 +135,7 @@ const AdminLicenseGeneration = () => {
         start_date: "",
         end_date: "",
         amount: "",
+        currency: "USD",
         pay_mode: "",
         reseller_id: "",
         issue_date: new Date().toISOString().split('T')[0],
@@ -242,7 +244,7 @@ const AdminLicenseGeneration = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <Input
@@ -252,6 +254,22 @@ const AdminLicenseGeneration = () => {
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">Currency</Label>
+              <Select
+                value={formData.currency}
+                onValueChange={(value) => setFormData({ ...formData, currency: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">$ (USD)</SelectItem>
+                  <SelectItem value="INR">₹ (INR)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

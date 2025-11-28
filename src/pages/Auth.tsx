@@ -58,7 +58,6 @@ const Auth = () => {
         }
 
         toast.success("Logged in successfully!");
-        navigate(profile?.role === "admin" ? "/admin" : "/dashboard");
       } else {
         const { error } = await supabase.auth.signUp({
           email,

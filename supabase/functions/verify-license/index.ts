@@ -96,6 +96,7 @@ Deno.serve(async (req) => {
           buyer_name: licenseData.buyer_name,
           buyer_email: licenseData.buyer_email,
           is_active: licenseData.is_active,
+          status: licenseData.is_active ? 'Active' : 'Inactive',
           start_date: licenseData.start_date,
           end_date: licenseData.end_date,
           created_at: licenseData.created_at,

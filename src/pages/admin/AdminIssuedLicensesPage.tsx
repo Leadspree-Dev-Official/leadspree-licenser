@@ -97,15 +97,18 @@ const AdminIssuedLicensesPage = () => {
 
   const handleSave = async (id: string) => {
     try {
-      const updatedIsActive = editedData.end_date 
-        ? calculateStatus(editedData.end_date)
-        : true;
-
       const { error } = await supabase
         .from("licenses")
         .update({
-          ...editedData,
-          is_active: updatedIsActive,
+          buyer_name: editedData.buyer_name,
+          buyer_email: editedData.buyer_email,
+          buyer_phone: editedData.buyer_phone,
+          start_date: editedData.start_date,
+          end_date: editedData.end_date,
+          amount: editedData.amount,
+          pay_mode: editedData.pay_mode,
+          issue_date: editedData.issue_date,
+          is_active: editedData.is_active,
         })
         .eq("id", id);
 

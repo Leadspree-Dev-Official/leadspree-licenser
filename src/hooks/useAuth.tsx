@@ -79,6 +79,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       setProfile(data);
+      
+      // Auto-redirect after profile is loaded
+      const currentPath = window.location.pathname;
+      if (currentPath === "/auth" && data) {
+        if (data.role === "admin") {
+          navigate("/admin");
+        } else if (data.role === "reseller" && data.status === "active") {
+          navigate("/dashboard");
+        }
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
