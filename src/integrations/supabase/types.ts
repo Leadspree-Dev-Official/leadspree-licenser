@@ -253,6 +253,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_license_usage: {
+        Args: { allocation_id: string }
+        Returns: undefined
+      }
       is_active_reseller: { Args: { user_id: string }; Returns: boolean }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       make_user_admin: { Args: { user_email: string }; Returns: undefined }
