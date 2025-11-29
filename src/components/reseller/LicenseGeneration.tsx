@@ -116,11 +116,10 @@ const LicenseGeneration = () => {
 
       if (insertError) throw insertError;
 
-      // Update allocation usage count
-      const { error: updateError } = await supabase
-        .from("reseller_allocations")
-        .update({ licenses_used: allocation.licenses_used + 1 })
-        .eq("id", allocation.id);
+      // Update allocation usage count using database function
+      const { error: updateError } = await supabase.rpc("increment_license_usage", {
+        allocation_id: allocation.id,
+      });
 
       if (updateError) throw updateError;
 
