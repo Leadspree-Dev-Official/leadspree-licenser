@@ -63,7 +63,29 @@ const AllocationsManagement = () => {
       if (resellersRes.error) throw resellersRes.error;
       if (softwareRes.error) throw softwareRes.error;
 
-      setAllocations(allocationsRes.data || []);
+      const baseAllocations = allocationsRes.data || [];
+
+      const allocationsWithUsage = await Promise.all(
+        baseAllocations.map(async (allocation: any) => {
+          const { count, error } = await supabase
+            .from("licenses")
+            .select("*", { count: "exact", head: true })
+            .eq("reseller_id", allocation.reseller_id)
+            .eq("software_id", allocation.software_id);
+
+          if (error) {
+            console.error("Error fetching license usage for allocation", error);
+            return allocation;
+          }
+
+          return {
+            ...allocation,
+            licenses_used: count ?? allocation.licenses_used ?? 0,
+          };
+        })
+      );
+
+      setAllocations(allocationsWithUsage);
       setResellers(resellersRes.data || []);
       setSoftware(softwareRes.data || []);
     } catch (error: any) {
