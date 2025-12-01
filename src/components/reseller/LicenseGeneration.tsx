@@ -48,7 +48,31 @@ const LicenseGeneration = () => {
         .eq("reseller_id", user!.id);
 
       if (error) throw error;
-      setAllocations(data || []);
+
+      const baseAllocations = data || [];
+
+      // Enrich allocations with up-to-date usage counts from licenses table
+      const allocationsWithUsage = await Promise.all(
+        baseAllocations.map(async (allocation: any) => {
+          const { count, error: usageError } = await supabase
+            .from("licenses")
+            .select("*", { count: "exact", head: true })
+            .eq("reseller_id", user!.id)
+            .eq("software_id", allocation.software_id);
+
+          if (usageError) {
+            console.error("Failed to load allocation usage", usageError);
+            return allocation;
+          }
+
+          return {
+            ...allocation,
+            licenses_used: count ?? allocation.licenses_used ?? 0,
+          };
+        })
+      );
+
+      setAllocations(allocationsWithUsage);
     } catch (error: any) {
       toast.error("Failed to load allocations");
     }
@@ -78,7 +102,20 @@ const LicenseGeneration = () => {
         return;
       }
 
-      if (allocation.licenses_used >= allocation.license_limit) {
+      // Re-check current usage directly from licenses table to avoid stale counts
+      const { count, error: usageError } = await supabase
+        .from("licenses")
+        .select("*", { count: "exact", head: true })
+        .eq("reseller_id", user!.id)
+        .eq("software_id", formData.software_id);
+
+      if (usageError) {
+        throw usageError;
+      }
+
+      const usedCount = count ?? 0;
+
+      if (usedCount >= allocation.license_limit) {
         toast.error("You have reached your license limit for this software");
         setLoading(false);
         return;
@@ -115,13 +152,6 @@ const LicenseGeneration = () => {
       ]);
 
       if (insertError) throw insertError;
-
-      // Update allocation usage count using database function
-      const { error: updateError } = await supabase.rpc("increment_license_usage", {
-        allocation_id: allocation.id,
-      });
-
-      if (updateError) throw updateError;
 
       toast.success(`License generated successfully: ${licenseKey}`);
 
