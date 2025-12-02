@@ -36,10 +36,9 @@ const AdminLicenseGeneration = () => {
     start_date: "",
     end_date: "",
     amount: "",
-    currency: "USD",
+    currency: "INR",
     pay_mode: "",
     reseller_id: "",
-    issue_date: new Date().toISOString().split('T')[0],
   });
 
   useEffect(() => {
@@ -117,7 +116,6 @@ const AdminLicenseGeneration = () => {
           currency: formData.currency,
           pay_mode: formData.pay_mode || null,
           reseller_id: formData.reseller_id || null,
-          issue_date: formData.issue_date || null,
           is_active: isActive,
           created_by: user!.id,
         },
@@ -136,10 +134,9 @@ const AdminLicenseGeneration = () => {
         start_date: "",
         end_date: "",
         amount: "",
-        currency: "USD",
+        currency: "INR",
         pay_mode: "",
         reseller_id: "",
-        issue_date: new Date().toISOString().split('T')[0],
       });
     } catch (error: any) {
       toast.error(error.message || "Failed to generate license");
@@ -223,26 +220,14 @@ const AdminLicenseGeneration = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="end_date">End Date</Label>
-              <Input
-                id="end_date"
-                type="date"
-                value={formData.end_date}
-                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="issue_date">Issue Date</Label>
-              <Input
-                id="issue_date"
-                type="date"
-                value={formData.issue_date}
-                onChange={(e) => setFormData({ ...formData, issue_date: e.target.value })}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="end_date">End Date</Label>
+            <Input
+              id="end_date"
+              type="date"
+              value={formData.end_date}
+              onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -286,6 +271,7 @@ const AdminLicenseGeneration = () => {
                   <SelectItem value="UPI">UPI</SelectItem>
                   <SelectItem value="Bank">Bank</SelectItem>
                   <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="Crypto">Crypto</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -157,8 +157,8 @@ const ResellerIssuedLicensesPage = () => {
                 <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[100px] sticky left-0 bg-background z-10">Actions</TableHead>
-                    <TableHead className="sticky left-[100px] bg-background z-10">Status</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead className="whitespace-nowrap">License Key</TableHead>
                     <TableHead>Software</TableHead>
                     <TableHead>Name</TableHead>
@@ -168,7 +168,6 @@ const ResellerIssuedLicensesPage = () => {
                     <TableHead className="whitespace-nowrap">End Date</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead className="whitespace-nowrap">Pay Mode</TableHead>
-                    <TableHead className="whitespace-nowrap">Issue Date</TableHead>
                     <TableHead>Created</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -177,7 +176,7 @@ const ResellerIssuedLicensesPage = () => {
                     const computedStatus = calculateStatus(license.end_date);
                     return (
                       <TableRow key={license.id}>
-                        <TableCell className="sticky left-0 bg-background">
+                        <TableCell>
                           <div className="flex items-center gap-1">
                           {editingId === license.id ? (
                             <>
@@ -216,7 +215,7 @@ const ResellerIssuedLicensesPage = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="sticky left-[100px] bg-background">
+                      <TableCell>
                         {editingId === license.id ? (
                           <Select
                             value={editedData.is_active ? "active" : "inactive"}
@@ -343,23 +342,11 @@ const ResellerIssuedLicensesPage = () => {
                               <SelectItem value="UPI">UPI</SelectItem>
                               <SelectItem value="Bank">Bank</SelectItem>
                               <SelectItem value="Cash">Cash</SelectItem>
+                              <SelectItem value="Crypto">Crypto</SelectItem>
                             </SelectContent>
                           </Select>
                         ) : (
                           license.pay_mode || "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                        {editingId === license.id ? (
-                          <Input
-                            type="date"
-                            value={editedData.issue_date || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, issue_date: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.issue_date ? new Date(license.issue_date).toLocaleDateString() : "-"
                         )}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm whitespace-nowrap">

@@ -24,12 +24,37 @@ const ResellerAllocationsPage = () => {
 
   const fetchAllocations = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("reseller_allocations")
-        .select("id, software(name, type, version), license_limit, licenses_used")
+        .select("id, software(name, type, version), license_limit, licenses_used, software_id")
         .eq("reseller_id", user!.id);
 
-      setAllocations(data || []);
+      if (error) throw error;
+
+      const baseAllocations = data || [];
+
+      // Enrich allocations with up-to-date usage counts from licenses table
+      const allocationsWithUsage = await Promise.all(
+        baseAllocations.map(async (allocation: any) => {
+          const { count, error: usageError } = await supabase
+            .from("licenses")
+            .select("*", { count: "exact", head: true })
+            .eq("reseller_id", user!.id)
+            .eq("software_id", allocation.software_id);
+
+          if (usageError) {
+            console.error("Failed to load allocation usage", usageError);
+            return allocation;
+          }
+
+          return {
+            ...allocation,
+            licenses_used: count ?? allocation.licenses_used ?? 0,
+          };
+        })
+      );
+
+      setAllocations(allocationsWithUsage);
     } catch (error) {
       console.error("Error fetching allocations:", error);
     } finally {
