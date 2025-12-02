@@ -29,7 +29,6 @@ const LicenseGeneration = () => {
     start_date: "",
     end_date: "",
     amount: "",
-    currency: "INR",
     pay_mode: "",
   });
 
@@ -141,7 +140,6 @@ const LicenseGeneration = () => {
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           amount: formData.amount ? parseFloat(formData.amount) : null,
-          currency: formData.currency,
           pay_mode: formData.pay_mode || null,
           reseller_id: user!.id,
           is_active: isActive,
@@ -162,7 +160,6 @@ const LicenseGeneration = () => {
         start_date: "",
         end_date: "",
         amount: "",
-        currency: "INR",
         pay_mode: "",
       });
 
@@ -264,7 +261,7 @@ const LicenseGeneration = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Amount</Label>
               <Input
@@ -274,22 +271,6 @@ const LicenseGeneration = () => {
                 value={formData.amount}
                 onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="currency">Currency</Label>
-              <Select
-                value={formData.currency}
-                onValueChange={(value) => setFormData({ ...formData, currency: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="USD">$ (USD)</SelectItem>
-                  <SelectItem value="INR">₹ (INR)</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="space-y-2">
