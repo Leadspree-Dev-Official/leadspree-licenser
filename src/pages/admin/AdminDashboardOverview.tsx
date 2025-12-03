@@ -269,7 +269,7 @@ const AdminDashboardOverview = () => {
             <DollarSign className="w-5 h-5 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.totalAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.totalAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -279,7 +279,7 @@ const AdminDashboardOverview = () => {
             <Calendar className="w-5 h-5 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.currentMonthAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.currentMonthAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -289,7 +289,7 @@ const AdminDashboardOverview = () => {
             <TrendingUp className="w-5 h-5 text-teal-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.currentYearAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.currentYearAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
@@ -478,7 +478,7 @@ const AdminDashboardOverview = () => {
                       <TableCell className="text-sm text-muted-foreground">
                         {license.reseller?.full_name || license.reseller?.email || "Admin"}
                       </TableCell>
-                      <TableCell>₹{(license.amount || 0).toLocaleString()}</TableCell>
+                      <TableCell>{(license.amount || 0).toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge variant={license.is_active ? "default" : "destructive"}>
                           {license.is_active ? "Active" : "Inactive"}

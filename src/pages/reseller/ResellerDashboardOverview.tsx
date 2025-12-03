@@ -234,7 +234,7 @@ const ResellerDashboardOverview = () => {
             <DollarSign className="w-5 h-5 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.totalAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.totalAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -244,7 +244,7 @@ const ResellerDashboardOverview = () => {
             <Calendar className="w-5 h-5 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.currentMonthAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.currentMonthAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -254,7 +254,7 @@ const ResellerDashboardOverview = () => {
             <TrendingUp className="w-5 h-5 text-teal-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.currentYearAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.currentYearAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
 
@@ -264,7 +264,7 @@ const ResellerDashboardOverview = () => {
             <TrendingUp className="w-5 h-5 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl lg:text-3xl font-bold">₹{stats.previousYearAmount.toLocaleString()}</div>
+            <div className="text-2xl lg:text-3xl font-bold">{stats.previousYearAmount.toLocaleString()}</div>
           </CardContent>
         </Card>
       </div>
@@ -427,7 +427,7 @@ const ResellerDashboardOverview = () => {
                         <Badge variant="outline">{license.software?.name}</Badge>
                       </TableCell>
                       <TableCell>{license.buyer_name}</TableCell>
-                      <TableCell>₹{(license.amount || 0).toLocaleString()}</TableCell>
+                      <TableCell>{(license.amount || 0).toLocaleString()}</TableCell>
                       <TableCell>
                         <Badge variant={license.is_active ? "default" : "destructive"}>
                           {license.is_active ? "Active" : "Inactive"}
