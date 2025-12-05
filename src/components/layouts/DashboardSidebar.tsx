@@ -1,5 +1,5 @@
 import { NavLink } from "@/components/NavLink";
-import { Home, FileKey, Package, Settings, Users, Key, LogOut, Menu, BarChart3, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, FileKey, Package, Settings, Users, Key, LogOut, Menu, BarChart3, FolderOpen, ChevronLeft, ChevronRight, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
@@ -35,6 +35,7 @@ const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     { to: "/admin/allocations", label: "Reseller Allocations", icon: Settings },
     { to: "/admin/users", label: "Users", icon: Users },
     { to: "/admin/api-keys", label: "API Keys", icon: Key },
+    { to: "/admin/buyer-data", label: "Buyer Data", icon: Database },
   ];
 
   const resellerLinks = [

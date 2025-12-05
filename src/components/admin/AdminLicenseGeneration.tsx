@@ -35,7 +35,6 @@ const AdminLicenseGeneration = () => {
     buyer_email: "",
     buyer_phone: "",
     platform: "",
-    extension_id: "",
     account_type: "buyer",
     start_date: "",
     end_date: "",
@@ -107,12 +106,6 @@ const AdminLicenseGeneration = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.extension_id.trim()) {
-      toast.error("Extension ID is required");
-      return;
-    }
-    
     setLoading(true);
 
     try {
@@ -135,7 +128,6 @@ const AdminLicenseGeneration = () => {
           buyer_email: formData.buyer_email || null,
           buyer_phone: formData.buyer_phone || null,
           platform: formData.platform || null,
-          extension_id: formData.extension_id,
           account_type: formData.account_type,
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
@@ -159,7 +151,6 @@ const AdminLicenseGeneration = () => {
         buyer_email: "",
         buyer_phone: "",
         platform: "",
-        extension_id: "",
         account_type: "buyer",
         start_date: "",
         end_date: "",
@@ -268,17 +259,6 @@ const AdminLicenseGeneration = () => {
                 placeholder="e.g., Windows, Mac, Linux"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="extension_id">Extension ID *</Label>
-            <Input
-              id="extension_id"
-              value={formData.extension_id}
-              onChange={(e) => setFormData({ ...formData, extension_id: e.target.value })}
-              placeholder="Enter extension ID"
-              required
-            />
           </div>
 
           {!isDemo && (

@@ -65,7 +65,6 @@ export type Database = {
           created_by: string | null
           currency: string | null
           end_date: string | null
-          extension_id: string | null
           id: string
           is_active: boolean
           issue_date: string | null
@@ -89,7 +88,6 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           end_date?: string | null
-          extension_id?: string | null
           id?: string
           is_active?: boolean
           issue_date?: string | null
@@ -113,7 +111,6 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           end_date?: string | null
-          extension_id?: string | null
           id?: string
           is_active?: boolean
           issue_date?: string | null

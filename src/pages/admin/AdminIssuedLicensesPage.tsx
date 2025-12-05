@@ -26,7 +26,6 @@ interface License {
   platform: string | null;
   remarks: string | null;
   account_type: string | null;
-  extension_id: string | null;
   software: { name: string };
   reseller_id: string | null;
   profiles: { full_name: string | null; email: string } | null;
@@ -65,7 +64,6 @@ const AdminIssuedLicensesPage = () => {
           platform,
           remarks,
           account_type,
-          extension_id,
           software(name),
           reseller_id,
           profiles!reseller_id(full_name, email)
@@ -120,7 +118,6 @@ const AdminIssuedLicensesPage = () => {
           platform: editedData.platform,
           remarks: editedData.remarks,
           account_type: editedData.account_type,
-          extension_id: editedData.extension_id,
         })
         .eq("id", id);
 
@@ -194,7 +191,6 @@ const AdminIssuedLicensesPage = () => {
                       <TableHead>Email</TableHead>
                       <TableHead>Phone</TableHead>
                       <TableHead>Platform</TableHead>
-                      <TableHead>Extension ID</TableHead>
                       <TableHead>Account Type</TableHead>
                       <TableHead className="whitespace-nowrap">Start Date</TableHead>
                       <TableHead className="whitespace-nowrap">End Date</TableHead>
@@ -332,18 +328,6 @@ const AdminIssuedLicensesPage = () => {
                               />
                             ) : (
                               license.platform || "-"
-                            )}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-sm">
-                            {editingId === license.id ? (
-                              <Input
-                                value={editedData.extension_id || ""}
-                                onChange={(e) =>
-                                  setEditedData({ ...editedData, extension_id: e.target.value })
-                                }
-                              />
-                            ) : (
-                              license.extension_id || "-"
                             )}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm">

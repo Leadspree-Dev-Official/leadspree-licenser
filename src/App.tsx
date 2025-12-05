@@ -16,6 +16,7 @@ import AdminSoftwarePage from "./pages/admin/AdminSoftwarePage";
 import AdminAllocationsPage from "./pages/admin/AdminAllocationsPage";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminApiKeysPage from "./pages/admin/AdminApiKeysPage";
+import AdminBuyerDataPage from "./pages/admin/AdminBuyerDataPage";
 import ResellerLayout from "./pages/reseller/ResellerLayout";
 import ResellerDashboardOverview from "./pages/reseller/ResellerDashboardOverview";
 import ResellerLicensesPage from "./pages/reseller/ResellerLicensesPage";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="allocations" element={<AdminAllocationsPage />} />
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="api-keys" element={<AdminApiKeysPage />} />
+              <Route path="buyer-data" element={<AdminBuyerDataPage />} />
             </Route>
 
             {/* Reseller Routes */}

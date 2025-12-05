@@ -26,7 +26,6 @@ interface License {
   platform: string | null;
   remarks: string | null;
   account_type: string | null;
-  extension_id: string | null;
   software: { name: string };
 }
 
@@ -47,7 +46,7 @@ const ResellerIssuedLicensesPage = () => {
     try {
       const { data } = await supabase
         .from("licenses")
-        .select("id, license_key, buyer_name, buyer_email, buyer_phone, start_date, end_date, amount, pay_mode, issue_date, is_active, created_at, platform, remarks, account_type, extension_id, software(name)")
+        .select("id, license_key, buyer_name, buyer_email, buyer_phone, start_date, end_date, amount, pay_mode, issue_date, is_active, created_at, platform, remarks, account_type, software(name)")
         .eq("created_by", user!.id)
         .order("created_at", { ascending: false });
 
@@ -99,7 +98,6 @@ const ResellerIssuedLicensesPage = () => {
           platform: editedData.platform,
           remarks: editedData.remarks,
           account_type: editedData.account_type,
-          extension_id: editedData.extension_id,
         })
         .eq("id", id);
 
@@ -173,7 +171,6 @@ const ResellerIssuedLicensesPage = () => {
                     <TableHead>Email</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Platform</TableHead>
-                    <TableHead>Extension ID</TableHead>
                     <TableHead>Account Type</TableHead>
                     <TableHead className="whitespace-nowrap">Start Date</TableHead>
                     <TableHead className="whitespace-nowrap">End Date</TableHead>
@@ -310,18 +307,6 @@ const ResellerIssuedLicensesPage = () => {
                           />
                         ) : (
                           license.platform || "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Input
-                            value={editedData.extension_id || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, extension_id: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.extension_id || "-"
                         )}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
