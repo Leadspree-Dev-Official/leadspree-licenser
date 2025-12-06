@@ -78,7 +78,7 @@ const UsersManagement = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>User Management</CardTitle>
+        <CardTitle>Reseller Management</CardTitle>
         <CardDescription>Approve, pause, or terminate reseller accounts</CardDescription>
       </CardHeader>
       <CardContent>
