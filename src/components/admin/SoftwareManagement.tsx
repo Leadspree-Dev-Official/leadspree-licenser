@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X } from "lucide-react";
 
 interface Software {
   id: string;
@@ -17,8 +17,13 @@ interface Software {
   slug: string;
   type: string;
   version: string;
-  description: string | null;
+  description: string;
   is_active: boolean;
+  image_url: string | null;
+  tagline: string | null;
+  features: string[] | null;
+  retail_price: number | null;
+  learn_more_link: string | null;
 }
 
 const SoftwareManagement = () => {
@@ -32,7 +37,13 @@ const SoftwareManagement = () => {
     type: "",
     version: "",
     description: "",
+    image_url: "",
+    tagline: "",
+    features: [] as string[],
+    retail_price: "",
+    learn_more_link: "",
   });
+  const [newFeature, setNewFeature] = useState("");
 
   const fetchSoftware = async () => {
     try {
@@ -57,17 +68,40 @@ const SoftwareManagement = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.description.trim()) {
+      toast.error("Description is mandatory");
+      return;
+    }
+
+    if (!formData.image_url.trim()) {
+      toast.error("Image URL is mandatory");
+      return;
+    }
+
+    const submitData = {
+      name: formData.name,
+      slug: formData.slug,
+      type: formData.type,
+      version: formData.version,
+      description: formData.description,
+      image_url: formData.image_url || null,
+      tagline: formData.tagline || null,
+      features: formData.features.length > 0 ? formData.features : null,
+      retail_price: formData.retail_price ? parseFloat(formData.retail_price) : null,
+      learn_more_link: formData.learn_more_link || null,
+    };
+
     try {
       if (editingSoftware) {
         const { error } = await supabase
           .from("software")
-          .update(formData)
+          .update(submitData)
           .eq("id", editingSoftware.id);
 
         if (error) throw error;
         toast.success("Software updated successfully");
       } else {
-        const { error } = await supabase.from("software").insert([formData]);
+        const { error } = await supabase.from("software").insert([submitData]);
 
         if (error) throw error;
         toast.success("Software added successfully");
@@ -102,7 +136,13 @@ const SoftwareManagement = () => {
       type: "",
       version: "",
       description: "",
+      image_url: "",
+      tagline: "",
+      features: [],
+      retail_price: "",
+      learn_more_link: "",
     });
+    setNewFeature("");
     setEditingSoftware(null);
   };
 
@@ -114,8 +154,27 @@ const SoftwareManagement = () => {
       type: item.type,
       version: item.version,
       description: item.description || "",
+      image_url: item.image_url || "",
+      tagline: item.tagline || "",
+      features: item.features || [],
+      retail_price: item.retail_price?.toString() || "",
+      learn_more_link: item.learn_more_link || "",
     });
     setDialogOpen(true);
+  };
+
+  const addFeature = () => {
+    if (newFeature.trim()) {
+      setFormData({ ...formData, features: [...formData.features, newFeature.trim()] });
+      setNewFeature("");
+    }
+  };
+
+  const removeFeature = (index: number) => {
+    setFormData({ 
+      ...formData, 
+      features: formData.features.filter((_, i) => i !== index) 
+    });
   };
 
   if (loading) {
@@ -136,7 +195,7 @@ const SoftwareManagement = () => {
               Add Software
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle>
@@ -147,28 +206,30 @@ const SoftwareManagement = () => {
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="slug">Slug</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                    required
-                    placeholder="lead-scraper-pro"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slug">Slug *</Label>
+                    <Input
+                      id="slug"
+                      value={formData.slug}
+                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      required
+                      placeholder="lead-scraper-pro"
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="type">Type</Label>
+                    <Label htmlFor="type">Type *</Label>
                     <Input
                       id="type"
                       value={formData.type}
@@ -178,7 +239,7 @@ const SoftwareManagement = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="version">Version</Label>
+                    <Label htmlFor="version">Version *</Label>
                     <Input
                       id="version"
                       value={formData.version}
@@ -189,13 +250,92 @@ const SoftwareManagement = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="tagline">Tagline</Label>
+                  <Input
+                    id="tagline"
+                    value={formData.tagline}
+                    onChange={(e) => setFormData({ ...formData, tagline: e.target.value })}
+                    placeholder="Short catchy tagline for the software"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description *</Label>
                   <Textarea
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
+                    required
+                    placeholder="Detailed description of the software"
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="image_url">Image URL *</Label>
+                  <Input
+                    id="image_url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    required
+                    placeholder="https://example.com/software-image.png"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="retail_price">Retail Price</Label>
+                    <Input
+                      id="retail_price"
+                      type="number"
+                      step="0.01"
+                      value={formData.retail_price}
+                      onChange={(e) => setFormData({ ...formData, retail_price: e.target.value })}
+                      placeholder="99.99"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="learn_more_link">Learn More Link</Label>
+                    <Input
+                      id="learn_more_link"
+                      value={formData.learn_more_link}
+                      onChange={(e) => setFormData({ ...formData, learn_more_link: e.target.value })}
+                      placeholder="https://example.com/contact"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Features (bullet points)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={newFeature}
+                      onChange={(e) => setNewFeature(e.target.value)}
+                      placeholder="Add a feature"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          addFeature();
+                        }
+                      }}
+                    />
+                    <Button type="button" onClick={addFeature} variant="outline">
+                      Add
+                    </Button>
+                  </div>
+                  {formData.features.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {formData.features.map((feature, index) => (
+                        <li key={index} className="flex items-center gap-2 text-sm bg-muted p-2 rounded">
+                          <span className="flex-1">• {feature}</span>
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => removeFeature(index)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
               <DialogFooter>
@@ -215,6 +355,7 @@ const SoftwareManagement = () => {
               <TableHead>Slug</TableHead>
               <TableHead>Type</TableHead>
               <TableHead>Version</TableHead>
+              <TableHead>Price</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -226,6 +367,7 @@ const SoftwareManagement = () => {
                 <TableCell className="text-muted-foreground">{item.slug}</TableCell>
                 <TableCell>{item.type}</TableCell>
                 <TableCell>{item.version}</TableCell>
+                <TableCell>{item.retail_price ? item.retail_price.toLocaleString() : '-'}</TableCell>
                 <TableCell>
                   <Badge variant={item.is_active ? "default" : "secondary"}>
                     {item.is_active ? "Active" : "Inactive"}

@@ -63,7 +63,6 @@ export type Database = {
           buyer_phone: string | null
           created_at: string
           created_by: string | null
-          currency: string | null
           end_date: string | null
           id: string
           is_active: boolean
@@ -86,7 +85,6 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           created_by?: string | null
-          currency?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
@@ -109,7 +107,6 @@ export type Database = {
           buyer_phone?: string | null
           created_at?: string
           created_by?: string | null
-          currency?: string | null
           end_date?: string | null
           id?: string
           is_active?: boolean
@@ -224,33 +221,48 @@ export type Database = {
       software: {
         Row: {
           created_at: string
-          description: string | null
+          description: string
+          features: string[] | null
           id: string
+          image_url: string | null
           is_active: boolean
+          learn_more_link: string | null
           name: string
+          retail_price: number | null
           slug: string
+          tagline: string | null
           type: string
           updated_at: string
           version: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
+          description?: string
+          features?: string[] | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          learn_more_link?: string | null
           name: string
+          retail_price?: number | null
           slug: string
+          tagline?: string | null
           type: string
           updated_at?: string
           version: string
         }
         Update: {
           created_at?: string
-          description?: string | null
+          description?: string
+          features?: string[] | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
+          learn_more_link?: string | null
           name?: string
+          retail_price?: number | null
           slug?: string
+          tagline?: string | null
           type?: string
           updated_at?: string
           version?: string

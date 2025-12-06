@@ -33,7 +33,7 @@ const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
     { to: "/admin/issued", label: "Licenses Issued", icon: FolderOpen },
     { to: "/admin/software", label: "Software", icon: Package },
     { to: "/admin/allocations", label: "Reseller Allocations", icon: Settings },
-    { to: "/admin/users", label: "Users", icon: Users },
+    { to: "/admin/users", label: "Resellers", icon: Users },
     { to: "/admin/api-keys", label: "API Keys", icon: Key },
     { to: "/admin/buyer-data", label: "Buyer Data", icon: Database },
   ];
