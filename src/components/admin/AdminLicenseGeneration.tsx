@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Key } from "lucide-react";
+import { validateLicenseForm, type LicenseFormData } from "@/lib/validation";
 
 interface Software {
   id: string;
@@ -21,14 +22,19 @@ interface Profile {
   id: string;
   full_name: string;
   email: string;
+}
+
+interface UserRole {
+  user_id: string;
   role: string;
 }
 
 const AdminLicenseGeneration = () => {
   const { user } = useAuth();
   const [software, setSoftware] = useState<Software[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<(Profile & { role?: string })[]>([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     software_id: "",
     buyer_name: "",
@@ -80,14 +86,32 @@ const AdminLicenseGeneration = () => {
 
   const fetchProfiles = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch profiles
+      const { data: profilesData, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, full_name, email, role")
+        .select("id, full_name, email")
         .eq("status", "active")
         .order("full_name");
 
-      if (error) throw error;
-      setProfiles(data || []);
+      if (profilesError) throw profilesError;
+
+      // Fetch user roles
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+
+      if (rolesError) throw rolesError;
+
+      // Merge profiles with roles
+      const profilesWithRoles = (profilesData || []).map((profile) => {
+        const userRole = (rolesData || []).find((r: UserRole) => r.user_id === profile.id);
+        return {
+          ...profile,
+          role: userRole?.role || "reseller",
+        };
+      });
+
+      setProfiles(profilesWithRoles);
     } catch (error: any) {
       toast.error("Failed to load users");
     }
@@ -106,6 +130,16 @@ const AdminLicenseGeneration = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    // Validate form data
+    const validation = validateLicenseForm(formData);
+    if (!validation.success) {
+      setErrors(validation.errors || {});
+      toast.error("Please fix the validation errors");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -124,17 +158,17 @@ const AdminLicenseGeneration = () => {
         {
           license_key: licenseKey,
           software_id: formData.software_id,
-          buyer_name: formData.buyer_name,
-          buyer_email: formData.buyer_email || null,
-          buyer_phone: formData.buyer_phone || null,
-          platform: formData.platform || null,
+          buyer_name: formData.buyer_name.trim(),
+          buyer_email: formData.buyer_email?.trim() || null,
+          buyer_phone: formData.buyer_phone?.trim() || null,
+          platform: formData.platform?.trim() || null,
           account_type: formData.account_type,
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
           amount: formData.account_type === "demo" ? null : (formData.amount ? parseFloat(formData.amount) : null),
           pay_mode: formData.account_type === "demo" ? null : (formData.pay_mode || null),
           reseller_id: formData.reseller_id || null,
-          remarks: formData.remarks || null,
+          remarks: formData.remarks?.trim() || null,
           is_active: isActive,
           created_by: user!.id,
         },
@@ -159,6 +193,7 @@ const AdminLicenseGeneration = () => {
         reseller_id: "",
         remarks: "",
       });
+      setErrors({});
     } catch (error: any) {
       toast.error(error.message || "Failed to generate license");
     } finally {
@@ -203,7 +238,7 @@ const AdminLicenseGeneration = () => {
                 onValueChange={(value) => setFormData({ ...formData, software_id: value })}
                 required
               >
-                <SelectTrigger>
+                <SelectTrigger className={errors.software_id ? "border-destructive" : ""}>
                   <SelectValue placeholder="Select software" />
                 </SelectTrigger>
                 <SelectContent>
@@ -214,6 +249,7 @@ const AdminLicenseGeneration = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.software_id && <p className="text-sm text-destructive">{errors.software_id}</p>}
             </div>
           </div>
 
@@ -224,8 +260,11 @@ const AdminLicenseGeneration = () => {
                 id="buyer_name"
                 value={formData.buyer_name}
                 onChange={(e) => setFormData({ ...formData, buyer_name: e.target.value })}
+                className={errors.buyer_name ? "border-destructive" : ""}
+                maxLength={100}
                 required
               />
+              {errors.buyer_name && <p className="text-sm text-destructive">{errors.buyer_name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -235,7 +274,10 @@ const AdminLicenseGeneration = () => {
                 type="email"
                 value={formData.buyer_email}
                 onChange={(e) => setFormData({ ...formData, buyer_email: e.target.value })}
+                className={errors.buyer_email ? "border-destructive" : ""}
+                maxLength={255}
               />
+              {errors.buyer_email && <p className="text-sm text-destructive">{errors.buyer_email}</p>}
             </div>
           </div>
 
@@ -247,7 +289,10 @@ const AdminLicenseGeneration = () => {
                 type="tel"
                 value={formData.buyer_phone}
                 onChange={(e) => setFormData({ ...formData, buyer_phone: e.target.value })}
+                className={errors.buyer_phone ? "border-destructive" : ""}
+                maxLength={20}
               />
+              {errors.buyer_phone && <p className="text-sm text-destructive">{errors.buyer_phone}</p>}
             </div>
 
             <div className="space-y-2">
@@ -257,7 +302,10 @@ const AdminLicenseGeneration = () => {
                 value={formData.platform}
                 onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
                 placeholder="e.g., Windows, Mac, Linux"
+                className={errors.platform ? "border-destructive" : ""}
+                maxLength={50}
               />
+              {errors.platform && <p className="text-sm text-destructive">{errors.platform}</p>}
             </div>
           </div>
 
@@ -292,9 +340,12 @@ const AdminLicenseGeneration = () => {
                     id="amount"
                     type="number"
                     step="0.01"
+                    min="0"
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                    className={errors.amount ? "border-destructive" : ""}
                   />
+                  {errors.amount && <p className="text-sm text-destructive">{errors.amount}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -353,7 +404,10 @@ const AdminLicenseGeneration = () => {
               onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
               placeholder="Any additional notes..."
               rows={3}
+              maxLength={500}
+              className={errors.remarks ? "border-destructive" : ""}
             />
+            {errors.remarks && <p className="text-sm text-destructive">{errors.remarks}</p>}
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
