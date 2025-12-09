@@ -1,0 +1,10 @@
+{
+    "name": "appwrite-setup-scripts",
+    "type": "module",
+    "scripts": {
+        "setup": "node setup-appwrite.mjs"
+    },
+    "dependencies": {
+        "node-appwrite": "^13.0.0"
+    }
+}

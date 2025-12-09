@@ -40,7 +40,32 @@ npm run dev
 
 ## Deployment
 
-### Deploy to Appwrite
+### Automated Setup (Recommended)
+
+Use the automated setup script to quickly configure your Appwrite project:
+
+```bash
+# Navigate to scripts directory
+cd scripts
+
+# Install dependencies
+npm install
+
+# Run automated setup
+npm run setup
+```
+
+The script will:
+- ✅ Create database (`licenser_db`)
+- ✅ Create all collections with proper fields
+- ✅ Set up indexes automatically
+- ✅ Provide next steps for function deployment
+
+See [scripts/README.md](./scripts/README.md) for detailed instructions.
+
+### Manual Setup
+
+Alternatively, follow the comprehensive manual setup guide:
 
 This project is configured for deployment to Appwrite. See the comprehensive setup guide:
 
@@ -66,9 +91,13 @@ leadspree-licenser/
 │   └── verify-license/       # Appwrite function for license verification
 │       ├── index.mjs          # Function entry point
 │       └── package.json       # Function dependencies
+├── scripts/                   # Automated setup scripts
+│   ├── setup-appwrite.mjs     # Database & collection setup
+│   ├── package.json           # Script dependencies
+│   └── README.md              # Setup instructions
 ├── src/                       # React frontend source
 ├── supabase/                  # Legacy Supabase configuration
-├── APPWRITE_SETUP.md          # Appwrite deployment guide
+├── APPWRITE_SETUP.md          # Manual deployment guide
 └── .env.appwrite.example      # Environment variables template
 ```
 
