@@ -41,11 +41,11 @@ async function delayResponse(start, minDelay = 200) {
   if (elapsed < minDelay) await new Promise(r => setTimeout(r, minDelay - elapsed));
 }
 
-function getClient(env) {
+function getClient() {
   const client = new Client()
-    .setEndpoint(env.APPWRITE_ENDPOINT)
-    .setProject(env.APPWRITE_PROJECT_ID)
-    .setKey(env.APPWRITE_API_KEY);
+    .setEndpoint(process.env.APPWRITE_ENDPOINT)
+    .setProject(process.env.APPWRITE_PROJECT_ID)
+    .setKey(process.env.APPWRITE_API_KEY);
 
   return { db: new Databases(client), Query };
 }
@@ -81,11 +81,11 @@ export default async ({ req, res, env, log }) => {
       return res.send(JSON.stringify({ valid: false, message: v.message }), 400, corsHeaders);
     }
 
-    const { db, Query } = getClient(env);
+    const { db, Query } = getClient();
 
     const { api_key, license_key, software_id } = body;
 
-    const apiRes = await db.listDocuments(env.DB_ID, env.COL_API_KEYS, [
+    const apiRes = await db.listDocuments(process.env.DB_ID, process.env.COL_API_KEYS, [
       Query.equal("key_string", api_key),
       Query.equal("is_active", true),
       Query.limit(1)
@@ -97,7 +97,7 @@ export default async ({ req, res, env, log }) => {
       return res.send(JSON.stringify({ valid: false, message: "Invalid API key" }), 401, corsHeaders);
     }
 
-    db.updateDocument(env.DB_ID, env.COL_API_KEYS, apiKeyRow.$id, {
+    db.updateDocument(process.env.DB_ID, process.env.COL_API_KEYS, apiKeyRow.$id, {
       last_used_at: new Date().toISOString()
     }).catch(() => { });
 
@@ -109,7 +109,7 @@ export default async ({ req, res, env, log }) => {
 
     if (software_id) filters.push(Query.equal("software_id", software_id));
 
-    const licRes = await db.listDocuments(env.DB_ID, env.COL_LICENSES, filters);
+    const licRes = await db.listDocuments(process.env.DB_ID, process.env.COL_LICENSES, filters);
     const license = licRes.documents?.[0];
 
     if (!license) {
@@ -119,7 +119,7 @@ export default async ({ req, res, env, log }) => {
 
     let software = null;
     try {
-      const s = await db.getDocument(env.DB_ID, env.COL_SOFTWARE, license.software_id);
+      const s = await db.getDocument(process.env.DB_ID, process.env.COL_SOFTWARE, license.software_id);
       software = { id: s.$id, name: s.name, version: s.version, type: s.type };
     } catch { }
 
