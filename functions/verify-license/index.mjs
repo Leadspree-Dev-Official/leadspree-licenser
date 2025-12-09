@@ -56,8 +56,9 @@ export default async ({ req, res, env, log }) => {
   if (req.method === "OPTIONS") return res.send(null, 204, corsHeaders);
 
   const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("cf-connecting-ip") ||
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    req.headers["cf-connecting-ip"] ||
+    req.headers["x-appwrite-client-ip"] ||
     "unknown";
 
   try {
@@ -70,7 +71,9 @@ export default async ({ req, res, env, log }) => {
     }
 
     let body;
-    try { body = await req.json(); }
+    try {
+      body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    }
     catch { return res.send(JSON.stringify({ valid: false, message: "Invalid JSON" }), 400, corsHeaders); }
 
     const v = validateInput(body);
