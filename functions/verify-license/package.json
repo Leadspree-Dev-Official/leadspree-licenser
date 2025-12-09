@@ -1,0 +1,7 @@
+{
+  "name": "verify-license",
+  "type": "module",
+  "dependencies": {
+    "node-appwrite": "^13.0.0"
+  }
+}

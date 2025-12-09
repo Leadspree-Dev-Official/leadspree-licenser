@@ -1,73 +1,95 @@
-# Welcome to your Lovable project
+# Leadspree Licenser
 
-## Project info
+A comprehensive license management system for software products, supporting multiple resellers and license verification.
 
-**URL**: https://lovable.dev/projects/ac85b2d3-6e2f-42d9-b937-a25dda222d2c
+## Project Info
 
-## How can I edit this code?
+**Original Lovable URL**: https://lovable.dev/projects/ac85b2d3-6e2f-42d9-b937-a25dda222d2c
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/ac85b2d3-6e2f-42d9-b937-a25dda222d2c) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
+## Technologies
 
 This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+- **Frontend**: Vite, TypeScript, React, shadcn-ui, Tailwind CSS
+- **Backend**: Appwrite Functions (Node.js 22)
+- **Database**: Appwrite Database
+- **Authentication**: Supabase Auth (or Appwrite Auth)
 
-## How can I deploy this project?
+## Getting Started
 
-Simply open [Lovable](https://lovable.dev/projects/ac85b2d3-6e2f-42d9-b937-a25dda222d2c) and click on Share -> Publish.
+### Prerequisites
 
-## Can I connect a custom domain to my Lovable project?
+- Node.js & npm ([install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+- Appwrite account (for deployment)
 
-Yes, you can!
+### Local Development
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```sh
+# Clone the repository
+git clone <YOUR_GIT_URL>
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+# Navigate to the project directory
+cd leadspree-licenser
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+## Deployment
+
+### Deploy to Appwrite
+
+This project is configured for deployment to Appwrite. See the comprehensive setup guide:
+
+📖 **[APPWRITE_SETUP.md](./APPWRITE_SETUP.md)** - Complete Appwrite deployment guide
+
+Quick overview:
+1. Create Appwrite project and database
+2. Deploy the `/functions/verify-license/` function from GitHub
+3. Configure environment variables
+4. Build and deploy frontend
+
+### Deploy to Lovable (Legacy)
+
+You can still deploy via Lovable:
+- Open [Lovable](https://lovable.dev/projects/ac85b2d3-6e2f-42d9-b937-a25dda222d2c)
+- Click Share → Publish
+
+## Project Structure
+
+```
+leadspree-licenser/
+├── functions/
+│   └── verify-license/       # Appwrite function for license verification
+│       ├── index.mjs          # Function entry point
+│       └── package.json       # Function dependencies
+├── src/                       # React frontend source
+├── supabase/                  # Legacy Supabase configuration
+├── APPWRITE_SETUP.md          # Appwrite deployment guide
+└── .env.appwrite.example      # Environment variables template
+```
+
+## Features
+
+- 🔐 **License Verification API** - Secure license key validation
+- 👥 **Multi-tenant Support** - Admin and reseller roles
+- 📊 **Dashboard Analytics** - License usage and statistics
+- 🔑 **API Key Management** - Secure API access control
+- 📦 **Software Management** - Multiple software products
+- 📈 **Allocation Tracking** - Reseller license allocations
+
+## Custom Domain
+
+To connect a custom domain:
+- **Lovable**: Navigate to Project > Settings > Domains and click Connect Domain
+- **Appwrite**: Configure in Appwrite Console under Settings > Domains
+
+Read more: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Support
+
+For deployment issues, see [APPWRITE_SETUP.md](./APPWRITE_SETUP.md) troubleshooting section.
+
