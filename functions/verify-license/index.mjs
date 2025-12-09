@@ -1,4 +1,4 @@
-import sdk from "node-appwrite";
+import { Client, Databases, Query } from "node-appwrite";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,7 +6,7 @@ const corsHeaders = {
 };
 
 const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60000; 
+const RATE_LIMIT_WINDOW_MS = 60000;
 const MAX_REQUESTS_PER_WINDOW = 30;
 
 function isRateLimited(ip) {
@@ -42,12 +42,12 @@ async function delayResponse(start, minDelay = 200) {
 }
 
 function getClient(env) {
-  const client = new sdk.Client()
+  const client = new Client()
     .setEndpoint(env.APPWRITE_ENDPOINT)
     .setProject(env.APPWRITE_PROJECT_ID)
     .setKey(env.APPWRITE_API_KEY);
 
-  return { db: new sdk.Databases(client), Query: sdk.Query };
+  return { db: new Databases(client), Query };
 }
 
 export default async ({ req, res, env, log }) => {
@@ -96,7 +96,7 @@ export default async ({ req, res, env, log }) => {
 
     db.updateDocument(env.DB_ID, env.COL_API_KEYS, apiKeyRow.$id, {
       last_used_at: new Date().toISOString()
-    }).catch(() => {});
+    }).catch(() => { });
 
     const filters = [
       Query.equal("license_key", license_key),
