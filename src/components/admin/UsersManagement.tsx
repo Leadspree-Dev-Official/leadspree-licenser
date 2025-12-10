@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { CheckCircle, XCircle, Pause, Play } from "lucide-react";
+import { CheckCircle, XCircle, Pause, Play, Trash2 } from "lucide-react";
 
 interface Profile {
   id: string;
@@ -53,6 +53,35 @@ const UsersManagement = () => {
       fetchProfiles();
     } catch (error: any) {
       toast.error("Failed to update user status");
+    }
+  };
+
+  const deleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`Are you sure you want to permanently delete ${userEmail}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // Delete from profiles (this will cascade to user_roles)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+      if (profileError) throw profileError;
+
+      // Delete from auth.users (admin operation)
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+
+      if (authError) {
+        console.warn("Could not delete auth user:", authError);
+        // Continue anyway as profile is deleted
+      }
+
+      toast.success(`User ${userEmail} deleted successfully`);
+      fetchProfiles();
+    } catch (error: any) {
+      toast.error("Failed to delete user: " + error.message);
     }
   };
 
@@ -153,6 +182,15 @@ const UsersManagement = () => {
                           Terminate
                         </Button>
                       )}
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => deleteUser(profile.id, profile.email)}
+                        className="gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete
+                      </Button>
                     </>
                   )}
                 </TableCell>

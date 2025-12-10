@@ -55,7 +55,7 @@ const AdminLicenseGeneration = () => {
     fetchProfiles();
   }, []);
 
-  // Auto-set dates for demo account
+  // Auto-set dates for demo account, clear for buyer
   useEffect(() => {
     if (formData.account_type === "demo") {
       const today = new Date().toISOString().split("T")[0];
@@ -65,6 +65,13 @@ const AdminLicenseGeneration = () => {
         end_date: today,
         amount: "",
         pay_mode: "",
+      }));
+    } else if (formData.account_type === "buyer") {
+      // Clear dates for buyer to show placeholder
+      setFormData((prev) => ({
+        ...prev,
+        start_date: "",
+        end_date: "",
       }));
     }
   }, [formData.account_type]);
@@ -323,22 +330,24 @@ const AdminLicenseGeneration = () => {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="start_date">Start Date</Label>
+                  <Label htmlFor="start_date">Start Date *</Label>
                   <Input
                     id="start_date"
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="end_date">End Date</Label>
+                  <Label htmlFor="end_date">End Date *</Label>
                   <Input
                     id="end_date"
                     type="date"
                     value={formData.end_date}
                     onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    required
                   />
                 </div>
               </div>
