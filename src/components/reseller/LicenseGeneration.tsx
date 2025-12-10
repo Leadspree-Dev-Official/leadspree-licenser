@@ -62,7 +62,7 @@ const LicenseGeneration = () => {
     try {
       const { data, error } = await supabase
         .from("reseller_allocations")
-        .select("*, software(name)")
+        .select("*, software(name), software_id, license_limit, licenses_used")
         .eq("reseller_id", user!.id);
 
       if (error) throw error;
@@ -331,6 +331,7 @@ const LicenseGeneration = () => {
                     type="date"
                     value={formData.start_date}
                     onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    className="block w-full"
                   />
                 </div>
 
@@ -341,6 +342,8 @@ const LicenseGeneration = () => {
                     type="date"
                     value={formData.end_date}
                     onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    min={formData.start_date || undefined}
+                    className="block w-full"
                   />
                 </div>
               </div>
