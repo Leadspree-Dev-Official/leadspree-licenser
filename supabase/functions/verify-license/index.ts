@@ -143,8 +143,8 @@ Deno.serve(async (req) => {
     const { api_key, license_key, software_id } = requestData;
 
     // Create Supabase client with service role key for admin access
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('DB_URL')!;
+    const supabaseServiceKey = Deno.env.get('SERVICE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Verify API key is valid and active

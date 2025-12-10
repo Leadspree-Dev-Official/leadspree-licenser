@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Shield } from "lucide-react";
+import { Shield, Home } from "lucide-react";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -84,6 +84,17 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
+      {/* Home Button */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="fixed top-4 left-4 shadow-md"
+        onClick={() => navigate("/")}
+        aria-label="Go to homepage"
+      >
+        <Home className="w-5 h-5" />
+      </Button>
+
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="space-y-4">
           <div className="flex justify-center">

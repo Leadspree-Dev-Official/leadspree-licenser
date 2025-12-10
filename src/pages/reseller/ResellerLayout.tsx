@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import DashboardSidebar from "@/components/layouts/DashboardSidebar";
 import { MessageCircle } from "lucide-react";
 
-const WHATSAPP_LINK = "https://wa.me/1234567890"; // Placeholder - will be updated later
+const WHATSAPP_LINK = "https://wa.me/919051822558";
 
 const ResellerLayout = () => {
   const { profile, loading } = useAuth();

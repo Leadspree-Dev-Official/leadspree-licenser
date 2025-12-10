@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Key, Users, Lock, Check, ExternalLink, MessageCircle, Sparkles, Zap } from "lucide-react";
+import { Shield, Key, Users, Lock, Check, ExternalLink, MessageCircle, Sparkles, Zap, Globe } from "lucide-react";
 
 interface Software {
   id: string;
@@ -19,7 +19,7 @@ interface Software {
   is_active: boolean;
 }
 
-const WHATSAPP_LINK = "https://wa.me/1234567890"; // Placeholder - will be updated later
+const WHATSAPP_LINK = "https://wa.me/919051822558";
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -121,9 +121,20 @@ const Index = () => {
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">LeadSpree</span>
         </div>
-        <Button onClick={() => navigate("/auth")} variant="outline" className="shadow-sm">
-          Sign In
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => window.open("https://leadspree.in", "_blank")}
+            variant="ghost"
+            size="sm"
+            className="hidden sm:flex"
+          >
+            <Globe className="w-4 h-4 mr-2" />
+            Visit Website
+          </Button>
+          <Button onClick={() => navigate("/auth")} variant="outline" className="shadow-sm">
+            Sign In
+          </Button>
+        </div>
       </header>
 
       {/* Hero Section */}
@@ -206,15 +217,15 @@ const Index = () => {
           ) : software.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {software.map((item, index) => (
-                <Card 
-                  key={item.id} 
+                <Card
+                  key={item.id}
                   className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-card/80 backdrop-blur-sm"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   {item.image_url ? (
                     <div className="h-52 overflow-hidden bg-gradient-to-br from-muted to-muted/50 relative">
-                      <img 
-                        src={item.image_url} 
+                      <img
+                        src={item.image_url}
                         alt={item.name}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
@@ -270,7 +281,7 @@ const Index = () => {
                     {item.learn_more_link && (
                       <Button asChild className="w-full mt-4 group/btn" variant="outline">
                         <a href={item.learn_more_link} target="_blank" rel="noopener noreferrer">
-                          Learn More 
+                          Learn More
                           <ExternalLink className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
                         </a>
                       </Button>
@@ -371,8 +382,8 @@ const Index = () => {
                 </div>
               </div>
               <div className="text-center">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="px-12 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg hover:shadow-xl transition-all"
                   onClick={() => window.open(WHATSAPP_LINK, "_blank")}
                 >
@@ -392,9 +403,20 @@ const Index = () => {
             <Shield className="w-5 h-5 text-primary" />
             <span className="font-semibold">LeadSpree</span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} LeadSpree. All rights reserved.
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <Button
+              onClick={() => window.open("https://leadspree.in", "_blank")}
+              variant="link"
+              size="sm"
+              className="text-muted-foreground hover:text-primary"
+            >
+              <Globe className="w-4 h-4 mr-2" />
+              Visit leadspree.in
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} LeadSpree. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
