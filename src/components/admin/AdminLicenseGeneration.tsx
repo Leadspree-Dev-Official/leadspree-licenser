@@ -143,10 +143,20 @@ const AdminLicenseGeneration = () => {
     setLoading(true);
 
     try {
+      // For demo accounts, always use today's date (calculated fresh at submission)
+      let finalStartDate = formData.start_date;
+      let finalEndDate = formData.end_date;
+
+      if (formData.account_type === "demo") {
+        const today = new Date().toISOString().split("T")[0];
+        finalStartDate = today;
+        finalEndDate = today;
+      }
+
       // Calculate is_active based on end_date
       let isActive = true;
-      if (formData.end_date) {
-        const endDate = new Date(formData.end_date);
+      if (finalEndDate) {
+        const endDate = new Date(finalEndDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         isActive = endDate >= today;
@@ -163,8 +173,8 @@ const AdminLicenseGeneration = () => {
           buyer_phone: formData.buyer_phone?.trim() || null,
           platform: formData.platform?.trim() || null,
           account_type: formData.account_type,
-          start_date: formData.start_date || null,
-          end_date: formData.end_date || null,
+          start_date: finalStartDate || null,
+          end_date: finalEndDate || null,
           amount: formData.account_type === "demo" ? null : (formData.amount ? parseFloat(formData.amount) : null),
           pay_mode: formData.account_type === "demo" ? null : (formData.pay_mode || null),
           reseller_id: formData.reseller_id || null,
