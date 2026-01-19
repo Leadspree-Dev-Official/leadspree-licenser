@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { Package, Key } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Package, Key, Download } from "lucide-react";
 
 interface Allocation {
   id: string;
