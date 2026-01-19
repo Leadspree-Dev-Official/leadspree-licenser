@@ -21,7 +21,7 @@ const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
       setIsMobile(mobile);
       setCollapsed(mobile);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -40,10 +40,10 @@ const DashboardSidebar = ({ role }: DashboardSidebarProps) => {
 
   const resellerLinks = [
     { to: "/dashboard", label: "Dashboard", icon: Home },
-    { to: "/dashboard/overview", label: "Overview", icon: BarChart3 },
-    { to: "/dashboard/allocations", label: "Software Allocation", icon: Package },
     { to: "/dashboard/licenses", label: "Generate License", icon: FileKey },
     { to: "/dashboard/issued", label: "Licenses Issued", icon: FolderOpen },
+    { to: "/dashboard/allocations", label: "Software Allocation", icon: Package },
+    { to: "/dashboard/overview", label: "Analytics", icon: BarChart3 },
   ];
 
   const links = role === "admin" ? adminLinks : resellerLinks;
