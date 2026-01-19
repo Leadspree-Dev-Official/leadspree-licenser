@@ -226,39 +226,43 @@ const ResellerIssuedLicensesPage = () => {
                         <TableRow key={license.id}>
                           <TableCell>
                             <div className="flex items-center gap-1">
-                              {editingId === license.id ? (
+                              {license.account_type === "demo" && (
                                 <>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleSave(license.id)}
-                                  >
-                                    <Save className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleCancelEdit}
-                                  >
-                                    <X className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              ) : (
-                                <>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleEdit(license)}
-                                  >
-                                    <Edit2 className="h-4 w-4" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDelete(license.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
+                                  {editingId === license.id ? (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleSave(license.id)}
+                                      >
+                                        <Save className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleCancelEdit}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleEdit(license)}
+                                      >
+                                        <Edit2 className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDelete(license.id)}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </>
+                                  )}
                                 </>
                               )}
                             </div>
