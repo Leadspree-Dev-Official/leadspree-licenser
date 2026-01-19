@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Edit, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -37,6 +38,7 @@ const AdminIssuedLicensesPage = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedData, setEditedData] = useState<any>({});
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     if (user) {
@@ -84,6 +86,27 @@ const AdminIssuedLicensesPage = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return end >= today;
+  };
+
+  const getFilteredLicenses = () => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    switch (filter) {
+      case "recent":
+        return licenses.filter(license => new Date(license.created_at) >= thirtyDaysAgo);
+      case "active":
+        return licenses.filter(license => calculateStatus(license.end_date));
+      case "expired":
+        return licenses.filter(license => !calculateStatus(license.end_date));
+      case "demo":
+        return licenses.filter(license => license.account_type === "demo");
+      case "buyer":
+        return licenses.filter(license => license.account_type === "buyer" || !license.account_type);
+      case "all":
+      default:
+        return licenses;
+    }
   };
 
   const handleCopyLicense = (licenseKey: string) => {
@@ -172,11 +195,27 @@ const AdminIssuedLicensesPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>All Licenses</CardTitle>
-          <CardDescription>Total: {licenses.length} licenses</CardDescription>
+          <CardDescription>
+            Showing {getFilteredLicenses().length} of {licenses.length} licenses
+          </CardDescription>
+          <div className="mt-4">
+            <Tabs value={filter} onValueChange={setFilter}>
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="recent">Recent</TabsTrigger>
+                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="expired">Expired</TabsTrigger>
+                <TabsTrigger value="demo">Demo</TabsTrigger>
+                <TabsTrigger value="buyer">Buyer</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardHeader>
         <CardContent>
-          {licenses.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No licenses generated yet</p>
+          {getFilteredLicenses().length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              {licenses.length === 0 ? "No licenses generated yet" : "No licenses match the selected filter"}
+            </p>
           ) : (
             <div className="max-h-[600px] overflow-y-auto">
               <div className="overflow-x-auto">
@@ -202,7 +241,7 @@ const AdminIssuedLicensesPage = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {licenses.map((license) => {
+                    {getFilteredLicenses().map((license) => {
                       const computedStatus = calculateStatus(license.end_date);
                       return (
                         <TableRow key={license.id}>
@@ -402,12 +441,12 @@ const AdminIssuedLicensesPage = () => {
                                 <SelectTrigger>
                                   <SelectValue />
                                 </SelectTrigger>
-                                 <SelectContent>
-                                   <SelectItem value="UPI">UPI</SelectItem>
-                                   <SelectItem value="Bank">Bank</SelectItem>
-                                   <SelectItem value="Cash">Cash</SelectItem>
-                                   <SelectItem value="Crypto">Crypto</SelectItem>
-                                 </SelectContent>
+                                <SelectContent>
+                                  <SelectItem value="UPI">UPI</SelectItem>
+                                  <SelectItem value="Bank">Bank</SelectItem>
+                                  <SelectItem value="Cash">Cash</SelectItem>
+                                  <SelectItem value="Crypto">Crypto</SelectItem>
+                                </SelectContent>
                               </Select>
                             ) : (
                               license.pay_mode || "-"

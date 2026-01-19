@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Edit2, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +36,7 @@ const ResellerIssuedLicensesPage = () => {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editedData, setEditedData] = useState<any>({});
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     if (user) {
@@ -64,6 +66,27 @@ const ResellerIssuedLicensesPage = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return end >= today;
+  };
+
+  const getFilteredLicenses = () => {
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    switch (filter) {
+      case "recent":
+        return licenses.filter(license => new Date(license.created_at) >= thirtyDaysAgo);
+      case "active":
+        return licenses.filter(license => calculateStatus(license.end_date));
+      case "expired":
+        return licenses.filter(license => !calculateStatus(license.end_date));
+      case "demo":
+        return licenses.filter(license => license.account_type === "demo");
+      case "buyer":
+        return licenses.filter(license => license.account_type === "buyer" || !license.account_type);
+      case "all":
+      default:
+        return licenses;
+    }
   };
 
   const handleCopyLicense = (licenseKey: string) => {
@@ -152,268 +175,284 @@ const ResellerIssuedLicensesPage = () => {
       <Card>
         <CardHeader>
           <CardTitle>All Licenses</CardTitle>
-          <CardDescription>Total: {licenses.length} licenses</CardDescription>
+          <CardDescription>
+            Showing {getFilteredLicenses().length} of {licenses.length} licenses
+          </CardDescription>
+          <div className="mt-4">
+            <Tabs value={filter} onValueChange={setFilter}>
+              <TabsList className="grid w-full grid-cols-6">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="recent">Recent</TabsTrigger>
+                <TabsTrigger value="active">Active</TabsTrigger>
+                <TabsTrigger value="expired">Expired</TabsTrigger>
+                <TabsTrigger value="demo">Demo</TabsTrigger>
+                <TabsTrigger value="buyer">Buyer</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardHeader>
         <CardContent>
-          {licenses.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">No licenses generated yet</p>
+          {getFilteredLicenses().length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              {licenses.length === 0 ? "No licenses generated yet" : "No licenses match the selected filter"}
+            </p>
           ) : (
             <div className="max-h-[600px] overflow-y-auto">
               <div className="overflow-x-auto">
                 <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="whitespace-nowrap">License Key</TableHead>
-                    <TableHead className="min-w-[120px]">Software</TableHead>
-                    <TableHead className="min-w-[120px]">Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Platform</TableHead>
-                    <TableHead>Account Type</TableHead>
-                    <TableHead className="whitespace-nowrap">Start Date</TableHead>
-                    <TableHead className="whitespace-nowrap">End Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead className="whitespace-nowrap">Pay Mode</TableHead>
-                    <TableHead>Remarks</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {licenses.map((license) => {
-                    const computedStatus = calculateStatus(license.end_date);
-                    return (
-                      <TableRow key={license.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                          {editingId === license.id ? (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleSave(license.id)}
-                              >
-                                <Save className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleCancelEdit}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(license)}
-                              >
-                                <Edit2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(license.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {editingId === license.id ? (
-                          <Select
-                            value={editedData.is_active ? "active" : "inactive"}
-                            onValueChange={(value) =>
-                              setEditedData({ ...editedData, is_active: value === "active" })
-                            }
-                          >
-                            <SelectTrigger className="w-[110px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="active">Active</SelectItem>
-                              <SelectItem value="inactive">Inactive</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge variant={computedStatus ? "default" : "secondary"}>
-                            {computedStatus ? "Active" : "Inactive"}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 whitespace-nowrap">
-                          <span className="font-mono text-sm">{license.license_key}</span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleCopyLicense(license.license_key)}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="whitespace-nowrap">{license.software.name}</span>
-                      </TableCell>
-                      <TableCell>
-                        {editingId === license.id ? (
-                          <Input
-                            value={editedData.buyer_name}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, buyer_name: e.target.value })
-                            }
-                          />
-                        ) : (
-                          <span className="whitespace-nowrap">{license.buyer_name}</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Input
-                            value={editedData.buyer_email || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, buyer_email: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.buyer_email
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Input
-                            value={editedData.buyer_phone || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, buyer_phone: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.buyer_phone
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Input
-                            value={editedData.platform || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, platform: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.platform || "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Select
-                            value={editedData.account_type || "buyer"}
-                            onValueChange={(value) =>
-                              setEditedData({ ...editedData, account_type: value })
-                            }
-                          >
-                            <SelectTrigger className="w-[100px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="buyer">Buyer</SelectItem>
-                              <SelectItem value="demo">Demo</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge variant={license.account_type === "demo" ? "secondary" : "outline"}>
-                            {license.account_type === "demo" ? "Demo" : "Buyer"}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                        {editingId === license.id ? (
-                          <Input
-                            type="date"
-                            value={editedData.start_date || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, start_date: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.start_date ? new Date(license.start_date).toLocaleDateString() : "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                        {editingId === license.id ? (
-                          <Input
-                            type="date"
-                            value={editedData.end_date || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, end_date: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.end_date ? new Date(license.end_date).toLocaleDateString() : "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Input
-                            type="number"
-                            value={editedData.amount || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, amount: parseFloat(e.target.value) })
-                            }
-                          />
-                        ) : (
-                          license.amount ? license.amount.toLocaleString() : "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                        {editingId === license.id ? (
-                          <Select
-                            value={editedData.pay_mode || ""}
-                            onValueChange={(value) =>
-                              setEditedData({ ...editedData, pay_mode: value })
-                            }
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="UPI">UPI</SelectItem>
-                              <SelectItem value="Bank">Bank</SelectItem>
-                              <SelectItem value="Cash">Cash</SelectItem>
-                              <SelectItem value="Crypto">Crypto</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          license.pay_mode || "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {editingId === license.id ? (
-                          <Input
-                            value={editedData.remarks || ""}
-                            onChange={(e) =>
-                              setEditedData({ ...editedData, remarks: e.target.value })
-                            }
-                          />
-                        ) : (
-                          license.remarks || "-"
-                        )}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
-                        {new Date(license.created_at).toLocaleDateString()}
-                      </TableCell>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Actions</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="whitespace-nowrap">License Key</TableHead>
+                      <TableHead className="min-w-[120px]">Software</TableHead>
+                      <TableHead className="min-w-[120px]">Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Platform</TableHead>
+                      <TableHead>Account Type</TableHead>
+                      <TableHead className="whitespace-nowrap">Start Date</TableHead>
+                      <TableHead className="whitespace-nowrap">End Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead className="whitespace-nowrap">Pay Mode</TableHead>
+                      <TableHead>Remarks</TableHead>
+                      <TableHead>Created</TableHead>
                     </TableRow>
-                  );
-                  })}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {getFilteredLicenses().map((license) => {
+                      const computedStatus = calculateStatus(license.end_date);
+                      return (
+                        <TableRow key={license.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {editingId === license.id ? (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleSave(license.id)}
+                                  >
+                                    <Save className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleEdit(license)}
+                                  >
+                                    <Edit2 className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleDelete(license.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {editingId === license.id ? (
+                              <Select
+                                value={editedData.is_active ? "active" : "inactive"}
+                                onValueChange={(value) =>
+                                  setEditedData({ ...editedData, is_active: value === "active" })
+                                }
+                              >
+                                <SelectTrigger className="w-[110px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge variant={computedStatus ? "default" : "secondary"}>
+                                {computedStatus ? "Active" : "Inactive"}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2 whitespace-nowrap">
+                              <span className="font-mono text-sm">{license.license_key}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCopyLicense(license.license_key)}
+                              >
+                                <Copy className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="whitespace-nowrap">{license.software.name}</span>
+                          </TableCell>
+                          <TableCell>
+                            {editingId === license.id ? (
+                              <Input
+                                value={editedData.buyer_name}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, buyer_name: e.target.value })
+                                }
+                              />
+                            ) : (
+                              <span className="whitespace-nowrap">{license.buyer_name}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Input
+                                value={editedData.buyer_email || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, buyer_email: e.target.value })
+                                }
+                              />
+                            ) : (
+                              license.buyer_email
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Input
+                                value={editedData.buyer_phone || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, buyer_phone: e.target.value })
+                                }
+                              />
+                            ) : (
+                              license.buyer_phone
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Input
+                                value={editedData.platform || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, platform: e.target.value })
+                                }
+                              />
+                            ) : (
+                              license.platform || "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Select
+                                value={editedData.account_type || "buyer"}
+                                onValueChange={(value) =>
+                                  setEditedData({ ...editedData, account_type: value })
+                                }
+                              >
+                                <SelectTrigger className="w-[100px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="buyer">Buyer</SelectItem>
+                                  <SelectItem value="demo">Demo</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge variant={license.account_type === "demo" ? "secondary" : "outline"}>
+                                {license.account_type === "demo" ? "Demo" : "Buyer"}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {editingId === license.id ? (
+                              <Input
+                                type="date"
+                                value={editedData.start_date || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, start_date: e.target.value })
+                                }
+                              />
+                            ) : (
+                              license.start_date ? new Date(license.start_date).toLocaleDateString() : "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {editingId === license.id ? (
+                              <Input
+                                type="date"
+                                value={editedData.end_date || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, end_date: e.target.value })
+                                }
+                              />
+                            ) : (
+                              license.end_date ? new Date(license.end_date).toLocaleDateString() : "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Input
+                                type="number"
+                                value={editedData.amount || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, amount: parseFloat(e.target.value) })
+                                }
+                              />
+                            ) : (
+                              license.amount ? license.amount.toLocaleString() : "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {editingId === license.id ? (
+                              <Select
+                                value={editedData.pay_mode || ""}
+                                onValueChange={(value) =>
+                                  setEditedData({ ...editedData, pay_mode: value })
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="UPI">UPI</SelectItem>
+                                  <SelectItem value="Bank">Bank</SelectItem>
+                                  <SelectItem value="Cash">Cash</SelectItem>
+                                  <SelectItem value="Crypto">Crypto</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              license.pay_mode || "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Input
+                                value={editedData.remarks || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, remarks: e.target.value })
+                                }
+                              />
+                            ) : (
+                              license.remarks || "-"
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
+                            {new Date(license.created_at).toLocaleDateString()}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-          </div>
           )}
         </CardContent>
       </Card>

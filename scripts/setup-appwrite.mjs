@@ -5,7 +5,7 @@
  * Automatically creates database, collections, and configures the Appwrite project
  */
 
-import sdk from 'node-appwrite';
+import { Client, Databases, Functions, Permission, Role, Query } from 'node-appwrite';
 import * as readline from 'readline';
 
 const rl = readline.createInterface({
@@ -40,13 +40,13 @@ async function setupAppwrite() {
     }
 
     // Initialize Appwrite client
-    const client = new sdk.Client()
+    const client = new Client()
         .setEndpoint(endpoint)
         .setProject(projectId)
         .setKey(apiKey);
 
-    const databases = new sdk.Databases(client);
-    const functions = new sdk.Functions(client);
+    const databases = new Databases(client);
+    const functions = new Functions(client);
 
     try {
         console.log('\n📦 Step 1: Creating Database...');
@@ -152,8 +152,9 @@ async function createCollection(databases, collectionId, name, attributes) {
             CONFIG.DB_ID,
             collectionId,
             name,
-            [sdk.Permission.read(sdk.Role.any())], // Read permissions
-            [sdk.Permission.write(sdk.Role.any())] // Write permissions (adjust as needed)
+            [Permission.read(Role.any())], // Read permissions
+            [Permission.write(Role.any())], // Write permissions (adjust as needed)
+            false // documentSecurity - set to false for collection-level permissions
         );
         console.log(`  ✅ Collection "${collectionId}" created`);
 
