@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Download } from "lucide-react";
 
 interface Software {
   id: string;
@@ -24,6 +24,7 @@ interface Software {
   features: string[] | null;
   retail_price: number | null;
   learn_more_link: string | null;
+  download_url: string | null;
 }
 
 const SoftwareManagement = () => {
@@ -42,6 +43,7 @@ const SoftwareManagement = () => {
     features: [] as string[],
     retail_price: "",
     learn_more_link: "",
+    download_url: "",
   });
   const [newFeature, setNewFeature] = useState("");
 
@@ -89,6 +91,7 @@ const SoftwareManagement = () => {
       features: formData.features.length > 0 ? formData.features : null,
       retail_price: formData.retail_price ? parseFloat(formData.retail_price) : null,
       learn_more_link: formData.learn_more_link || null,
+      download_url: formData.download_url || null,
     };
 
     try {
@@ -141,6 +144,7 @@ const SoftwareManagement = () => {
       features: [],
       retail_price: "",
       learn_more_link: "",
+      download_url: "",
     });
     setNewFeature("");
     setEditingSoftware(null);
@@ -159,6 +163,7 @@ const SoftwareManagement = () => {
       features: item.features || [],
       retail_price: item.retail_price?.toString() || "",
       learn_more_link: item.learn_more_link || "",
+      download_url: item.download_url || "",
     });
     setDialogOpen(true);
   };
@@ -171,9 +176,9 @@ const SoftwareManagement = () => {
   };
 
   const removeFeature = (index: number) => {
-    setFormData({ 
-      ...formData, 
-      features: formData.features.filter((_, i) => i !== index) 
+    setFormData({
+      ...formData,
+      features: formData.features.filter((_, i) => i !== index)
     });
   };
 
@@ -302,6 +307,15 @@ const SoftwareManagement = () => {
                   </div>
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="download_url">Download URL</Label>
+                  <Input
+                    id="download_url"
+                    value={formData.download_url}
+                    onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
+                    placeholder="https://example.com/download/software.zip"
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label>Features (bullet points)</Label>
                   <div className="flex gap-2">
                     <Input
@@ -324,9 +338,9 @@ const SoftwareManagement = () => {
                       {formData.features.map((feature, index) => (
                         <li key={index} className="flex items-center gap-2 text-sm bg-muted p-2 rounded">
                           <span className="flex-1">• {feature}</span>
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
+                          <Button
+                            type="button"
+                            variant="ghost"
                             size="sm"
                             onClick={() => removeFeature(index)}
                           >
@@ -357,6 +371,7 @@ const SoftwareManagement = () => {
               <TableHead>Version</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Download</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -372,6 +387,18 @@ const SoftwareManagement = () => {
                   <Badge variant={item.is_active ? "default" : "secondary"}>
                     {item.is_active ? "Active" : "Inactive"}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {item.download_url && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(item.download_url!, '_blank')}
+                    >
+                      <Download className="w-3 h-3 mr-1" />
+                      Download
+                    </Button>
+                  )}
                 </TableCell>
                 <TableCell className="text-right space-x-2">
                   <Button size="sm" variant="outline" onClick={() => openEditDialog(item)}>

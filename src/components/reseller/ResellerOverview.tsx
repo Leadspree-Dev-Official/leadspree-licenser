@@ -11,7 +11,7 @@ interface Allocation {
   license_limit: number;
   licenses_used: number;
   software_id: string;
-  software: { name: string; type: string; version: string };
+  software: { name: string; type: string; version: string; download_url: string | null };
 }
 
 interface License {
@@ -40,7 +40,7 @@ const ResellerOverview = () => {
       const [allocationsRes, licensesRes] = await Promise.all([
         supabase
           .from("reseller_allocations")
-          .select("*, software(name, type, version)")
+          .select("*, software(name, type, version, download_url)")
           .eq("reseller_id", user!.id),
         supabase
           .from("licenses")
@@ -129,6 +129,7 @@ const ResellerOverview = () => {
                 <TableHead>Version</TableHead>
                 <TableHead>Usage</TableHead>
                 <TableHead>Remaining</TableHead>
+                <TableHead>Download</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -155,6 +156,18 @@ const ResellerOverview = () => {
                     </TableCell>
                     <TableCell>
                       <span className="font-semibold">{remaining}</span>
+                    </TableCell>
+                    <TableCell>
+                      {allocation.software.download_url && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open(allocation.software.download_url!, '_blank')}
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Download
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
