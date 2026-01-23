@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Download } from "lucide-react";
 
 interface Allocation {
   id: string;
-  software: { name: string; type: string; version: string };
+  software: { name: string; type: string; version: string; download_url: string | null };
   license_limit: number;
   licenses_used: number;
 }
@@ -26,7 +29,7 @@ const ResellerAllocationsPage = () => {
     try {
       const { data, error } = await supabase
         .from("reseller_allocations")
-        .select("id, software(name, type, version), license_limit, licenses_used, software_id")
+        .select("id, software(name, type, version, download_url), license_limit, licenses_used, software_id")
         .eq("reseller_id", user!.id);
 
       if (error) throw error;
@@ -67,11 +70,7 @@ const ResellerAllocationsPage = () => {
       <div className="p-4 lg:p-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted rounded"></div>
-            ))}
-          </div>
+          <div className="h-64 bg-muted rounded"></div>
         </div>
       </div>
     );
@@ -84,51 +83,71 @@ const ResellerAllocationsPage = () => {
         <p className="text-muted-foreground">Your assigned license quotas per software</p>
       </div>
 
-      {allocations.length === 0 ? (
-        <Card>
-          <CardContent className="py-12">
-            <p className="text-center text-muted-foreground">No allocations assigned yet</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {allocations.map((allocation) => (
-            <Card key={allocation.id}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>{allocation.software.name}</span>
-                  <Badge variant={allocation.licenses_used >= allocation.license_limit ? "destructive" : "default"}>
-                    {allocation.license_limit - allocation.licenses_used} left
-                  </Badge>
-                </CardTitle>
-                <CardDescription>
-                  {allocation.software.type} • Version {allocation.software.version}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Used</span>
-                    <span className="font-medium">{allocation.licenses_used}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Limit</span>
-                    <span className="font-medium">{allocation.license_limit}</span>
-                  </div>
-                  <div className="w-full bg-muted rounded-full h-2 mt-2">
-                    <div
-                      className="bg-primary h-2 rounded-full transition-all"
-                      style={{
-                        width: `${Math.min((allocation.licenses_used / allocation.license_limit) * 100, 100)}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Software</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Version</TableHead>
+                <TableHead className="w-[300px]">Usage</TableHead>
+                <TableHead>Remaining</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {allocations.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No allocations assigned yet
+                  </TableCell>
+                </TableRow>
+              ) : (
+                allocations.map((allocation) => {
+                  const percentage =
+                    (allocation.licenses_used / allocation.license_limit) * 100;
+                  const remaining = allocation.license_limit - allocation.licenses_used;
+
+                  return (
+                    <TableRow key={allocation.id}>
+                      <TableCell className="font-medium">{allocation.software.name}</TableCell>
+                      <TableCell>{allocation.software.type}</TableCell>
+                      <TableCell>{allocation.software.version}</TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span>
+                              {allocation.licenses_used} / {allocation.license_limit}
+                            </span>
+                            <span>{percentage.toFixed(0)}%</span>
+                          </div>
+                          <Progress value={percentage} className="h-2" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-semibold">{remaining}</span>
+                      </TableCell>
+                      <TableCell>
+                        {allocation.software.download_url && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => window.open(allocation.software.download_url!, '_blank')}
+                          >
+                            <Download className="w-3 h-3 mr-1" />
+                            Download
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

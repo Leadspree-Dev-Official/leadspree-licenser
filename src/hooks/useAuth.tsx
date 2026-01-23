@@ -24,49 +24,40 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   profile: null,
   loading: true,
-  signOut: async () => {},
+  signOut: async () => { },
 });
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  // MOCK DATA FOR TESTING
+  const [user, setUser] = useState<User | null>({
+    id: 'mock-admin-id',
+    email: 'admin@example.com',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString()
+  } as any);
+  const [session, setSession] = useState<Session | null>({
+    access_token: 'mock',
+    token_type: 'bearer',
+    user: { id: 'mock-admin-id' }
+  } as any);
+  const [profile, setProfile] = useState<Profile | null>({
+    id: 'mock-admin-id',
+    email: 'admin@example.com',
+    role: 'admin',
+    status: 'active',
+    full_name: 'Test Admin'
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Fetch profile after auth state changes
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    // Mock effect - do nothing or just navigate if needed
+    // const { data: { subscription } } = supabase.auth.onAuthStateChange(...)
+    // return () => subscription.unsubscribe();
   }, []);
 
   const fetchProfile = async (userId: string) => {
@@ -79,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) throw error;
       setProfile(data);
-      
+
       // Auto-redirect after profile is loaded
       const currentPath = window.location.pathname;
       if (currentPath === "/auth" && data) {

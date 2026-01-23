@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Edit2, Save, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +26,8 @@ interface License {
   platform: string | null;
   remarks: string | null;
   account_type: string | null;
+  license_type: string | null;
+  browser_id: string | null;
   software: { name: string };
 }
 
@@ -38,17 +39,45 @@ const ResellerIssuedLicensesPage = () => {
   const [editedData, setEditedData] = useState<any>({});
   const [filter, setFilter] = useState<string>("all");
 
+  // New Filter States
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [softwareFilter, setSoftwareFilter] = useState<string>("all");
+  const [accountTypeFilter, setAccountTypeFilter] = useState<string>("all");
+  const [licenseTypeFilter, setLicenseTypeFilter] = useState<string>("all");
+  const [nameFilter, setNameFilter] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+
+  const [softwareList, setSoftwareList] = useState<{ id: string, name: string }[]>([]);
+
   useEffect(() => {
     if (user) {
       fetchLicenses();
+      fetchFilterData();
     }
   }, [user]);
+
+  const fetchFilterData = async () => {
+    // Fetch unique software names from licenses or allocations
+    // For Reseller, it's safest to get from allocations or unique software from licenses
+    // Let's use allocations to show all possible software they can sell
+    const { data: allocData } = await supabase
+      .from("reseller_allocations")
+      .select("software(id, name)")
+      .eq("reseller_id", user!.id);
+
+    const uniqueSoftware = allocData?.map(a => a.software).filter((s, i, arr) =>
+      arr.findIndex(x => x.id === s.id) === i
+    ) || [];
+
+    setSoftwareList(uniqueSoftware as { id: string, name: string }[]);
+  };
 
   const fetchLicenses = async () => {
     try {
       const { data } = await supabase
         .from("licenses")
-        .select("id, license_key, buyer_name, buyer_email, buyer_phone, start_date, end_date, amount, pay_mode, issue_date, is_active, created_at, platform, remarks, account_type, software(name)")
+        .select("id, license_key, buyer_name, buyer_email, buyer_phone, start_date, end_date, amount, pay_mode, issue_date, is_active, created_at, platform, remarks, account_type, license_type, browser_id, software(name)")
         .eq("created_by", user!.id)
         .order("created_at", { ascending: false });
 
@@ -69,24 +98,41 @@ const ResellerIssuedLicensesPage = () => {
   };
 
   const getFilteredLicenses = () => {
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    return licenses.filter(license => {
+      // Status Filter
+      if (statusFilter !== "all") {
+        const isActive = statusFilter === "active";
+        if (license.is_active !== isActive) return false;
+      }
 
-    switch (filter) {
-      case "recent":
-        return licenses.filter(license => new Date(license.created_at) >= thirtyDaysAgo);
-      case "active":
-        return licenses.filter(license => calculateStatus(license.end_date));
-      case "expired":
-        return licenses.filter(license => !calculateStatus(license.end_date));
-      case "demo":
-        return licenses.filter(license => license.account_type === "demo");
-      case "buyer":
-        return licenses.filter(license => license.account_type === "buyer" || !license.account_type);
-      case "all":
-      default:
-        return licenses;
-    }
+      // Software Filter
+      if (softwareFilter !== "all" && license.software?.name !== softwareFilter) return false;
+
+      // Account Type Filter
+      if (accountTypeFilter !== "all") {
+        const type = license.account_type || "buyer"; // Default to buyer if null
+        if (type !== accountTypeFilter) return false;
+      }
+
+      // License Type Filter
+      if (licenseTypeFilter !== "all") {
+        const type = license.license_type || "Basic"; // Default to Basic if null
+        if (type !== licenseTypeFilter) return false;
+      }
+
+      // Name Search
+      if (nameFilter && !license.buyer_name.toLowerCase().includes(nameFilter.toLowerCase())) return false;
+
+      // Date Range
+      if (startDate && new Date(license.created_at) < new Date(startDate)) return false;
+      if (endDate) {
+        const endDateTime = new Date(endDate);
+        endDateTime.setHours(23, 59, 59, 999);
+        if (new Date(license.created_at) > endDateTime) return false;
+      }
+
+      return true;
+    });
   };
 
   const handleCopyLicense = (licenseKey: string) => {
@@ -121,6 +167,8 @@ const ResellerIssuedLicensesPage = () => {
           platform: editedData.platform,
           remarks: editedData.remarks,
           account_type: editedData.account_type,
+          license_type: editedData.license_type,
+          browser_id: editedData.browser_id,
         })
         .eq("id", id);
 
@@ -179,16 +227,73 @@ const ResellerIssuedLicensesPage = () => {
             Showing {getFilteredLicenses().length} of {licenses.length} licenses
           </CardDescription>
           <div className="mt-4">
-            <Tabs value={filter} onValueChange={setFilter}>
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="recent">Recent</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="expired">Expired</TabsTrigger>
-                <TabsTrigger value="demo">Demo</TabsTrigger>
-                <TabsTrigger value="buyer">Buyer</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-[repeat(7,minmax(0,1fr))] gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={softwareFilter} onValueChange={setSoftwareFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Software" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Software</SelectItem>
+                  {softwareList.map(s => (
+                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={accountTypeFilter} onValueChange={setAccountTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Account Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Account Types</SelectItem>
+                  <SelectItem value="buyer">Buyer</SelectItem>
+                  <SelectItem value="demo">Demo</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Select value={licenseTypeFilter} onValueChange={setLicenseTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="License Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All License Types</SelectItem>
+                  <SelectItem value="Basic">Basic</SelectItem>
+                  <SelectItem value="Pro">Pro</SelectItem>
+                  <SelectItem value="Premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Input
+                placeholder="Search by name..."
+                value={nameFilter}
+                onChange={(e) => setNameFilter(e.target.value)}
+              />
+
+              <Input
+                type="date"
+                placeholder="Start date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+
+              <Input
+                type="date"
+                placeholder="End date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -211,6 +316,8 @@ const ResellerIssuedLicensesPage = () => {
                       <TableHead>Phone</TableHead>
                       <TableHead>Platform</TableHead>
                       <TableHead>Account Type</TableHead>
+                      <TableHead>License Type</TableHead>
+                      <TableHead>Extension ID</TableHead>
                       <TableHead className="whitespace-nowrap">Start Date</TableHead>
                       <TableHead className="whitespace-nowrap">End Date</TableHead>
                       <TableHead>Amount</TableHead>
@@ -372,6 +479,42 @@ const ResellerIssuedLicensesPage = () => {
                               <Badge variant={license.account_type === "demo" ? "secondary" : "outline"}>
                                 {license.account_type === "demo" ? "Demo" : "Buyer"}
                               </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Select
+                                value={editedData.license_type || "Basic"}
+                                onValueChange={(value) =>
+                                  setEditedData({ ...editedData, license_type: value })
+                                }
+                              >
+                                <SelectTrigger className="w-[100px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Basic">Basic</SelectItem>
+                                  <SelectItem value="Pro">Pro</SelectItem>
+                                  <SelectItem value="Premium">Premium</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge variant="outline" className="bg-primary/5">
+                                {license.license_type || "Basic"}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">
+                            {editingId === license.id ? (
+                              <Input
+                                value={editedData.browser_id || ""}
+                                onChange={(e) =>
+                                  setEditedData({ ...editedData, browser_id: e.target.value })
+                                }
+                                placeholder="Extension ID"
+                              />
+                            ) : (
+                              <span className="font-mono text-xs">{license.browser_id ? license.browser_id.substring(0, 8) + '...' : '-'}</span>
                             )}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm whitespace-nowrap">

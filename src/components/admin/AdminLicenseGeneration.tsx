@@ -10,6 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Key } from "lucide-react";
 import { validateLicenseForm, type LicenseFormData } from "@/lib/validation";
+import { Database } from "@/integrations/supabase/types";
+
+type LicenseType = Database["public"]["Enums"]["license_type_enum"];
 
 interface Software {
   id: string;
@@ -42,6 +45,8 @@ const AdminLicenseGeneration = () => {
     buyer_phone: "",
     platform: "",
     account_type: "buyer",
+    license_type: "Pro",
+    browser_id: "",
     start_date: "",
     end_date: "",
     amount: "",
@@ -180,6 +185,8 @@ const AdminLicenseGeneration = () => {
           buyer_phone: formData.buyer_phone?.trim() || null,
           platform: formData.platform?.trim() || null,
           account_type: formData.account_type,
+          license_type: formData.license_type as LicenseType,
+          browser_id: formData.browser_id?.trim() || null,
           start_date: finalStartDate || null,
           end_date: finalEndDate || null,
           amount: formData.account_type === "demo" ? null : (formData.amount ? parseFloat(formData.amount) : null),
@@ -203,6 +210,8 @@ const AdminLicenseGeneration = () => {
         buyer_phone: "",
         platform: "",
         account_type: "buyer",
+        license_type: "Basic",
+        browser_id: "",
         start_date: "",
         end_date: "",
         amount: "",
@@ -231,23 +240,7 @@ const AdminLicenseGeneration = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="account_type">Account Type *</Label>
-              <Select
-                value={formData.account_type}
-                onValueChange={(value) => setFormData({ ...formData, account_type: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select account type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="buyer">Buyer A/c</SelectItem>
-                  <SelectItem value="demo">Demo A/c</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="space-y-2">
               <Label htmlFor="software">Software *</Label>
               <Select
@@ -268,9 +261,52 @@ const AdminLicenseGeneration = () => {
               </Select>
               {errors.software_id && <p className="text-sm text-destructive">{errors.software_id}</p>}
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="browser_id">Extension ID</Label>
+              <Input
+                id="browser_id"
+                value={formData.browser_id}
+                onChange={(e) => setFormData({ ...formData, browser_id: e.target.value })}
+                placeholder="Extension ID"
+                className={errors.browser_id ? "border-destructive" : ""}
+                maxLength={100}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="account_type">Account Type *</Label>
+              <Select
+                value={formData.account_type}
+                onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select account type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="buyer">Buyer A/c</SelectItem>
+                  <SelectItem value="demo">Demo A/c</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="license_type">License Type *</Label>
+              <Select
+                value={formData.license_type}
+                onValueChange={(value) => setFormData({ ...formData, license_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select license type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Basic">Basic</SelectItem>
+                  <SelectItem value="Pro">Pro</SelectItem>
+                  <SelectItem value="Premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="buyer_name">Name *</Label>
               <Input
@@ -296,9 +332,7 @@ const AdminLicenseGeneration = () => {
               />
               {errors.buyer_email && <p className="text-sm text-destructive">{errors.buyer_email}</p>}
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="buyer_phone">Phone</Label>
               <Input
@@ -324,11 +358,9 @@ const AdminLicenseGeneration = () => {
               />
               {errors.platform && <p className="text-sm text-destructive">{errors.platform}</p>}
             </div>
-          </div>
 
-          {!isDemo && (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {!isDemo && (
+              <>
                 <div className="space-y-2">
                   <Label htmlFor="start_date">Start Date *</Label>
                   <Input
@@ -350,9 +382,7 @@ const AdminLicenseGeneration = () => {
                     required
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="amount">Amount</Label>
                   <Input
@@ -384,49 +414,49 @@ const AdminLicenseGeneration = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </>
+            )}
+
+            {isDemo && (
+              <div className="lg:col-span-4 p-4 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Demo account: Start and End dates are automatically set to today's date.
+                </p>
               </div>
-            </>
-          )}
+            )}
 
-          {isDemo && (
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                Demo account: Start and End dates are automatically set to today's date.
-              </p>
+            <div className="space-y-2">
+              <Label htmlFor="reseller">Reseller</Label>
+              <Select
+                value={formData.reseller_id}
+                onValueChange={(value) => setFormData({ ...formData, reseller_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select reseller or admin" />
+                </SelectTrigger>
+                <SelectContent>
+                  {profiles.map((profile) => (
+                    <SelectItem key={profile.id} value={profile.id}>
+                      {profile.full_name || profile.email} ({profile.role})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="reseller">Reseller</Label>
-            <Select
-              value={formData.reseller_id}
-              onValueChange={(value) => setFormData({ ...formData, reseller_id: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select reseller or admin" />
-              </SelectTrigger>
-              <SelectContent>
-                {profiles.map((profile) => (
-                  <SelectItem key={profile.id} value={profile.id}>
-                    {profile.full_name || profile.email} ({profile.role})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="remarks">Remarks</Label>
-            <Textarea
-              id="remarks"
-              value={formData.remarks}
-              onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
-              placeholder="Any additional notes..."
-              rows={3}
-              maxLength={500}
-              className={errors.remarks ? "border-destructive" : ""}
-            />
-            {errors.remarks && <p className="text-sm text-destructive">{errors.remarks}</p>}
+            <div className="lg:col-span-3 space-y-2">
+              <Label htmlFor="remarks">Remarks</Label>
+              <Textarea
+                id="remarks"
+                value={formData.remarks}
+                onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
+                placeholder="Any additional notes..."
+                rows={1}
+                maxLength={500}
+                className={`min-h-[42px] py-2 ${errors.remarks ? "border-destructive" : ""}`}
+              />
+              {errors.remarks && <p className="text-sm text-destructive">{errors.remarks}</p>}
+            </div>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
