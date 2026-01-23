@@ -74,7 +74,7 @@ export type Database = {
           reseller_id: string | null
           software_id: string
           start_date: string | null
-          browser_id: string | null
+          extension_id: string | null
           license_type: Database["public"]["Enums"]["license_type_enum"]
         }
         Insert: {
@@ -98,7 +98,7 @@ export type Database = {
           reseller_id?: string | null
           software_id: string
           start_date?: string | null
-          browser_id?: string | null
+          extension_id?: string | null
           license_type?: Database["public"]["Enums"]["license_type_enum"]
         }
         Update: {
@@ -122,7 +122,7 @@ export type Database = {
           reseller_id?: string | null
           software_id?: string
           start_date?: string | null
-          browser_id?: string | null
+          extension_id?: string | null
           license_type?: Database["public"]["Enums"]["license_type_enum"]
         }
         Relationships: [

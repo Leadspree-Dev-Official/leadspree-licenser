@@ -46,6 +46,12 @@ export const licenseFormSchema = z.object({
     .max(500, "Remarks must be less than 500 characters")
     .optional()
     .or(z.literal("")),
+  extension_id: z
+    .string()
+    .trim()
+    .max(100, "Extension ID must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type LicenseFormData = z.infer<typeof licenseFormSchema>;
@@ -57,11 +63,11 @@ export function validateLicenseForm(data: Record<string, unknown>): {
   errors?: Record<string, string>;
 } {
   const result = licenseFormSchema.safeParse(data);
-  
+
   if (result.success) {
     return { success: true, data: result.data };
   }
-  
+
   const errors: Record<string, string> = {};
   result.error.errors.forEach((err) => {
     const path = err.path.join(".");
@@ -69,6 +75,6 @@ export function validateLicenseForm(data: Record<string, unknown>): {
       errors[path] = err.message;
     }
   });
-  
+
   return { success: false, errors };
 }

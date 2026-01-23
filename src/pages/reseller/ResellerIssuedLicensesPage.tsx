@@ -27,7 +27,7 @@ interface License {
   remarks: string | null;
   account_type: string | null;
   license_type: string | null;
-  browser_id: string | null;
+  extension_id: string | null;
   software: { name: string };
 }
 
@@ -77,7 +77,7 @@ const ResellerIssuedLicensesPage = () => {
     try {
       const { data } = await supabase
         .from("licenses")
-        .select("id, license_key, buyer_name, buyer_email, buyer_phone, start_date, end_date, amount, pay_mode, issue_date, is_active, created_at, platform, remarks, account_type, license_type, browser_id, software(name)")
+        .select("id, license_key, buyer_name, buyer_email, buyer_phone, start_date, end_date, amount, pay_mode, issue_date, is_active, created_at, platform, remarks, account_type, license_type, extension_id, software(name)")
         .eq("created_by", user!.id)
         .order("created_at", { ascending: false });
 
@@ -168,7 +168,7 @@ const ResellerIssuedLicensesPage = () => {
           remarks: editedData.remarks,
           account_type: editedData.account_type,
           license_type: editedData.license_type,
-          browser_id: editedData.browser_id,
+          extension_id: editedData.extension_id,
         })
         .eq("id", id);
 
@@ -507,14 +507,14 @@ const ResellerIssuedLicensesPage = () => {
                           <TableCell className="text-muted-foreground text-sm">
                             {editingId === license.id ? (
                               <Input
-                                value={editedData.browser_id || ""}
+                                value={editedData.extension_id || ""}
                                 onChange={(e) =>
-                                  setEditedData({ ...editedData, browser_id: e.target.value })
+                                  setEditedData({ ...editedData, extension_id: e.target.value })
                                 }
                                 placeholder="Extension ID"
                               />
                             ) : (
-                              <span className="font-mono text-xs">{license.browser_id ? license.browser_id.substring(0, 8) + '...' : '-'}</span>
+                              <span className="font-mono text-xs">{license.extension_id ? license.extension_id.substring(0, 8) + '...' : '-'}</span>
                             )}
                           </TableCell>
                           <TableCell className="text-muted-foreground text-sm whitespace-nowrap">

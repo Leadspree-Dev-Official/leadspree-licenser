@@ -46,7 +46,7 @@ const AdminLicenseGeneration = () => {
     platform: "",
     account_type: "buyer",
     license_type: "Pro",
-    browser_id: "",
+    extension_id: "",
     start_date: "",
     end_date: "",
     amount: "",
@@ -186,7 +186,7 @@ const AdminLicenseGeneration = () => {
           platform: formData.platform?.trim() || null,
           account_type: formData.account_type,
           license_type: formData.license_type as LicenseType,
-          browser_id: formData.browser_id?.trim() || null,
+          extension_id: formData.extension_id?.trim() || null,
           start_date: finalStartDate || null,
           end_date: finalEndDate || null,
           amount: formData.account_type === "demo" ? null : (formData.amount ? parseFloat(formData.amount) : null),
@@ -211,7 +211,7 @@ const AdminLicenseGeneration = () => {
         platform: "",
         account_type: "buyer",
         license_type: "Basic",
-        browser_id: "",
+        extension_id: "",
         start_date: "",
         end_date: "",
         amount: "",
@@ -263,13 +263,13 @@ const AdminLicenseGeneration = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="browser_id">Extension ID</Label>
+              <Label htmlFor="extension_id">Extension ID</Label>
               <Input
-                id="browser_id"
-                value={formData.browser_id}
-                onChange={(e) => setFormData({ ...formData, browser_id: e.target.value })}
+                id="extension_id"
+                value={formData.extension_id}
+                onChange={(e) => setFormData({ ...formData, extension_id: e.target.value })}
                 placeholder="Extension ID"
-                className={errors.browser_id ? "border-destructive" : ""}
+                className={errors.extension_id ? "border-destructive" : ""}
                 maxLength={100}
               />
             </div>

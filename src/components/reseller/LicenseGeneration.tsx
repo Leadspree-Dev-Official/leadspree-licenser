@@ -35,7 +35,7 @@ const LicenseGeneration = () => {
     platform: "",
     account_type: "buyer",
     license_type: "Pro",
-    browser_id: "",
+    extension_id: "",
     start_date: "",
     end_date: "",
     amount: "",
@@ -128,12 +128,12 @@ const LicenseGeneration = () => {
 
     // Custom validation for Reseller: Extension ID is mandatory
     let additionalErrors = {};
-    if (!formData.browser_id || formData.browser_id.trim() === "") {
-      additionalErrors = { ...additionalErrors, browser_id: "Extension ID is required for resellers" };
+    if (!formData.extension_id || formData.extension_id.trim() === "") {
+      additionalErrors = { ...additionalErrors, extension_id: "Extension ID is required for resellers" };
     }
 
     if (!validation.success || Object.keys(additionalErrors).length > 0) {
-      setErrors({ ...validation.errors, ...additionalErrors } || additionalErrors);
+      setErrors({ ...validation.errors, ...additionalErrors });
       toast.error("Please fix the validation errors");
       return;
     }
@@ -199,7 +199,7 @@ const LicenseGeneration = () => {
           platform: formData.platform?.trim() || null,
           account_type: formData.account_type,
           license_type: formData.license_type as LicenseType,
-          browser_id: formData.browser_id?.trim() || null,
+          extension_id: formData.extension_id?.trim() || null,
           start_date: finalStartDate || null,
           end_date: finalEndDate || null,
           amount: formData.account_type === "demo" ? null : (formData.amount ? parseFloat(formData.amount) : null),
@@ -224,7 +224,7 @@ const LicenseGeneration = () => {
         platform: "",
         account_type: "buyer",
         license_type: "Pro",
-        browser_id: "",
+        extension_id: "",
         start_date: "",
         end_date: "",
         amount: "",
@@ -282,17 +282,17 @@ const LicenseGeneration = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="browser_id">Extension ID *</Label>
+              <Label htmlFor="extension_id">Extension ID *</Label>
               <Input
-                id="browser_id"
-                value={formData.browser_id}
-                onChange={(e) => setFormData({ ...formData, browser_id: e.target.value })}
+                id="extension_id"
+                value={formData.extension_id}
+                onChange={(e) => setFormData({ ...formData, extension_id: e.target.value })}
                 placeholder="Extension ID"
-                className={errors.browser_id ? "border-destructive" : ""}
+                className={errors.extension_id ? "border-destructive" : ""}
                 maxLength={100}
                 required
               />
-              {errors.browser_id && <p className="text-sm text-destructive">{errors.browser_id}</p>}
+              {errors.extension_id && <p className="text-sm text-destructive">{errors.extension_id}</p>}
             </div>
 
             <div className="space-y-2">
