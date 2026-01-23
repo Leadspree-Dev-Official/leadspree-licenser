@@ -250,7 +250,7 @@ const AdminIssuedLicensesPage = () => {
             Showing {getFilteredLicenses().length} of {licenses.length} licenses
           </CardDescription>
           <div className="mt-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Status" />

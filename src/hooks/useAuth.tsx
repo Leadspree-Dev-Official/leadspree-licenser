@@ -30,34 +30,37 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // MOCK DATA FOR TESTING
-  const [user, setUser] = useState<User | null>({
-    id: 'mock-admin-id',
-    email: 'admin@example.com',
-    app_metadata: {},
-    user_metadata: {},
-    aud: 'authenticated',
-    created_at: new Date().toISOString()
-  } as any);
-  const [session, setSession] = useState<Session | null>({
-    access_token: 'mock',
-    token_type: 'bearer',
-    user: { id: 'mock-admin-id' }
-  } as any);
-  const [profile, setProfile] = useState<Profile | null>({
-    id: 'mock-admin-id',
-    email: 'admin@example.com',
-    role: 'admin',
-    status: 'active',
-    full_name: 'Test Admin'
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Mock effect - do nothing or just navigate if needed
-    // const { data: { subscription } } = supabase.auth.onAuthStateChange(...)
-    // return () => subscription.unsubscribe();
+    // Check for initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchProfile = async (userId: string) => {
